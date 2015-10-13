@@ -5,7 +5,7 @@
 
 using namespace std;
 
-FileSystem::FileSystem() {
+FileSystem::FileSystem() : _cwd(_root) {
 	format();
 }
 
@@ -19,13 +19,13 @@ void FileSystem::format(void)
 	mMemblockDevice.writeBlock(0, reinterpret_cast<char*>(&masterBlock));
 
 	// Create the root directory
-	DirectoryBlock rootDirectory;
-	strcpy(rootDirectory.Name, "");
-	rootDirectory.ParentDirectory = 0;
-	rootDirectory.NextDirectoryBlock = 0;
-	rootDirectory.ChildDirectoryCount = 0;
-	rootDirectory.FileCount = 0;
-	mMemblockDevice.writeBlock(1, reinterpret_cast<char*>(&rootDirectory));
+	// DirectoryBlock rootDirectory;
+	// strcpy(rootDirectory.Name, "");
+	// rootDirectory.ParentDirectory = 0;
+	// rootDirectory.NextDirectoryBlock = 0;
+	// rootDirectory.ChildDirectoryCount = 0;
+	// rootDirectory.FileCount = 0;
+	// mMemblockDevice.writeBlock(1, reinterpret_cast<char*>(&rootDirectory));
 
 	// Empty block initialization.
 	// Have the empty blocks point to the next.
@@ -38,7 +38,16 @@ void FileSystem::format(void)
 		mMemblockDevice.writeBlock(i, data);
 	}
 
-	_cwd = Tree("");
+	_root = Tree("");
+
+	_cwd = _root;
+	_cwd.AddSubdirectory("first");
+	_cwd.AddSubdirectory("second");
+	_cwd.AddFile(1);
+	_cwd = _cwd.GetDirectory("first");
+	_cwd.AddFile(2);
+	_cwd.AddFile(3);
+
 	//_cwdBlock = mMemblockDevice.readBlock(1);
 }
 

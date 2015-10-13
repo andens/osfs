@@ -15,7 +15,7 @@ private:
     Block *_cwdDirectories = nullptr;
     Block *_cwdFiles = nullptr;
     Tree _root;
-    Tree _cwd;
+    Tree& _cwd;
 
 private:
     struct MasterBlock
@@ -38,15 +38,15 @@ private:
         unsigned PayloadBlocks[122];
     };
 
-    struct DirectoryBlock
-    {
-        char Name[16];
-        unsigned ParentDirectory;
-        unsigned NextDirectoryBlock;
-        unsigned ChildDirectoryCount;
-        unsigned FileCount;
-        unsigned Children[120];
-    };
+    // struct DirectoryBlock
+    // {
+    //     char Name[16];
+    //     unsigned ParentDirectory;
+    //     unsigned NextDirectoryBlock;
+    //     unsigned ChildDirectoryCount;
+    //     unsigned FileCount;
+    //     unsigned Children[120];
+    // };
 
 public:
     FileSystem();
