@@ -97,7 +97,6 @@ void FileSystem::create(const std::string &filePath)
 	//Creating new FileBlock
 
 	FileBlock newFile;
-
 	if(filePath.size()>15)
 	{
 		cout << "Name is too big" << endl;
