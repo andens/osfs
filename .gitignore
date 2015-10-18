@@ -27,4 +27,7 @@
 *.out
 *.app
 
-realOSProjekt/bin/*
+Debug/*
+.vs/*
+*.sdf
+*/Debug/*
