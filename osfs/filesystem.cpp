@@ -30,6 +30,8 @@ void FileSystem::format(void)
 		mMemblockDevice.writeBlock(i, data);
 	}
 
+	cd("/");
+
 	_cwd = &_root;
 	_cwd->AddSubdirectory("first");
 	_cwd->AddSubdirectory("second");
@@ -109,40 +111,32 @@ void FileSystem::cd(const string& directory)
 
 	vector<string> newPath = _Split(directory);
 
-	// Begins with '/': absoute path, relative otherwise
+	Tree *oldWD = _cwd;
+
+	// Begins with '/': absoute path, relative otherwise. In case of absolute
+	// we want to start from the root instead of the current directory.
 	if (directory[0] == '/')
-	{
-		Tree *oldWD = _cwd;
 		_cwd = &_root;
-		for (unsigned i = 0; i < newPath.size(); ++i)
-		{
-			_cwd = _cwd->GetDirectory(newPath[i]);
-			if (!_cwd)
-				break;
-		}
 
-		if (!_cwd)
-		{
-			_cwd = oldWD;
-			cout << "Could not find directory '" << directory << "'." << endl;
-		}
-	}
-	else
+	// Attempt to navigate to every new subdirectory.
+	for (unsigned i = 0; i < newPath.size(); ++i)
 	{
-		Tree *oldWD = _cwd;
-		for (unsigned i = 0; i < newPath.size(); ++i)
-		{
-			_cwd = _cwd->GetDirectory(newPath[i]);
-			if (!_cwd)
-				break;
-		}
-
+		_cwd = _cwd->GetDirectory(newPath[i]);
 		if (!_cwd)
-		{
-			_cwd = oldWD;
-			cout << "Could not find directory '" << directory << "'." << endl;
-		}
+			break;
 	}
+
+	// If _cwd is invalid it means that a certain subdirectory was not found.
+	// We return to the one we were in before starting.
+	if (!_cwd)
+	{
+		_cwd = oldWD;
+		cout << "Could not find directory '" << directory << "'." << endl;
+		return;
+	}
+
+	// If everything worked out properly, _cwd will now be the correct directory.
+	_GetFilesCWD();
 }
 
 void FileSystem::_GetFilesCWD(void)
