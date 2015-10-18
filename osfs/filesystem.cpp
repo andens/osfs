@@ -77,12 +77,52 @@ void FileSystem::ls(void) const
 
 void FileSystem::create(const std::string &filePath)
 {
-	const vector<int>& files = _cwd->GetFiles();
-
-	for (int i = 0;i < files.size();i++)
+	//Kolla ifall filen redan finns
+	for (auto i = _cwdFiles.begin();i != _cwdFiles.end();i++)
 	{
-
+		if(i->second.Name == filePath)
+		{
+			cout << "File already finns" << endl;
+			return;
+		}
 	}
+
+	//Creating new FileBlock
+
+	FileBlock newFile;
+
+	if(filePath.size()<16)
+	{
+		cout << "Name is too big" << endl;
+	}
+	
+	strcpy(newFile.Name, filePath.c_str());
+	newFile.Access = 0;
+	newFile.FileSize = 0;
+	for (int i = 0;i < 122;i++)
+	{
+		newFile.PayloadBlocks[i] = 0;
+	}
+
+	//step two leta reda på ledig plats
+	Block temp;
+	//fetching master block
+	temp = mMemblockDevice.readBlock(0);
+
+	MasterBlock masterTemp;
+	//creating a masterBlock
+	memcpy(&masterTemp, temp.data(), 512);
+	unsigned BlockSlott = masterTemp.FirstEmptyBlock;
+	//fetching second Empty block
+	Block _temp = mMemblockDevice.readBlock(masterTemp.FirstEmptyBlock);
+	// Copy next empty block pointer
+	memcpy(&masterTemp.FirstEmptyBlock, _temp.data(), 4); 
+	mMemblockDevice.writeBlock(0, (char*)&masterTemp);
+	//step tre skriva till sagda plats
+	mMemblockDevice.writeBlock(BlockSlott, (char*)&newFile);
+	//lägg till fil i cwd
+	_cwd->AddFile(BlockSlott);
+
 
 }
 
