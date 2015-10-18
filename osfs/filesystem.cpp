@@ -30,15 +30,13 @@ void FileSystem::format(void)
 		mMemblockDevice.writeBlock(i, data);
 	}
 
-	_cwd = &_root;
+	cd("/");
 	_cwd->AddSubdirectory("first");
 	_cwd->AddSubdirectory("second");
-	_cwd->AddFile(1);
-	_cwd = _cwd->GetDirectory("first");
-	_cwd->AddFile(2);
-	_cwd->AddFile(3);
-	_cwd = &_root;
-
+	create("a");
+	cd("first");
+	create("b");
+	create("c");
 	cd("/");
 }
 
@@ -190,9 +188,9 @@ void FileSystem::_GetFilesCWD(void)
 	
 	auto& files = _cwd->GetFiles();
 	for_each(files.begin(), files.end(), [this](int file) {
-		const void *blockData = mMemblockDevice.readBlock(file).data();
+		Block blockData = mMemblockDevice.readBlock(file);
 		FileBlock block;
-		memcpy(&block, blockData, 512);
+		memcpy(&block, blockData.data(), 512);
 		_cwdFiles[file] = block;
 	});
 }
