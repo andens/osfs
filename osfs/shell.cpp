@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include "filesystem.h"
+#include <Windows.h>
 
 using namespace std;
 
@@ -36,8 +37,17 @@ int main(void) {
 
     bool bRun = true;
 
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
     do {
-        cout << user << ":" << currentDir << "$ ";
+		currentDir = fs.GetCWD();
+
+		SetConsoleTextAttribute(hConsole, 10);
+		cout << user << " ";
+		SetConsoleTextAttribute(hConsole, 14);
+		cout << currentDir << endl;
+		SetConsoleTextAttribute(hConsole, 15);
+		cout << "$ ";
         getline(cin, userCommand);
 
         int nrOfCommands = parseCommandString(userCommand, commandArr);
@@ -89,7 +99,7 @@ int main(void) {
                 break;
 
             case 12: // cd
-
+				fs.cd(commandArr[1]);
                 break;
 
             case 13: // pwd
