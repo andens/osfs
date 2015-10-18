@@ -147,5 +147,13 @@ void FileSystem::cd(const string& directory)
 
 void FileSystem::_GetFilesCWD(void)
 {
-
+	_cwdFiles.clear();
+	
+	auto& files = _cwd->GetFiles();
+	for_each(files.begin(), files.end(), [this](int file) {
+		const void *blockData = mMemblockDevice.readBlock(file).data();
+		FileBlock block;
+		memcpy(&block, blockData, 512);
+		_cwdFiles[file] = block;
+	});
 }
