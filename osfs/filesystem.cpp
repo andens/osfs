@@ -144,3 +144,8 @@ void FileSystem::cd(const string& directory)
 		}
 	}
 }
+
+void FileSystem::_GetFilesCWD(void)
+{
+
+}
