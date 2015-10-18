@@ -85,7 +85,7 @@ int main(void) {
                 break;
 
             case 11: // mkdir
-
+				fs.mkdir(commandArr[1]);
                 break;
 
             case 12: // cd
