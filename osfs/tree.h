@@ -14,7 +14,7 @@ public:
 	void AddSubdirectory(std::string subDirectory);
 	void RemoveSubdirectory(std::string subDirectory, std::function<void(int)> RemoveFile);
 	void AddFile(int file);
-	Tree& GetDirectory(std::string subDirectory);
+	Tree* GetDirectory(std::string subDirectory);
 	const std::vector<int>& GetFiles(void) const;
 	std::vector<std::string> GetSubdirectories(void) const;
 

@@ -15,7 +15,7 @@ private:
     Block *_cwdDirectories = nullptr;
     Block *_cwdFiles = nullptr;
     Tree _root;
-    Tree& _cwd;
+	Tree* _cwd = nullptr;
 
 private:
     struct MasterBlock
