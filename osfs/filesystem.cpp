@@ -98,12 +98,13 @@ void FileSystem::create(const std::string &filePath)
 
 	FileBlock newFile;
 
-	if(filePath.size()<16)
+	if(filePath.size()>15)
 	{
 		cout << "Name is too big" << endl;
+		return;
 	}
 	
-	strcpy(newFile.Name, filePath.c_str());
+	strncpy_s(newFile.Name,filePath.c_str(),filePath.size());
 	newFile.Access = 0;
 	newFile.FileSize = 0;
 	for (int i = 0;i < 122;i++)
@@ -130,7 +131,7 @@ void FileSystem::create(const std::string &filePath)
 	//lägg till fil i cwd
 	_cwd->AddFile(BlockSlott);
 
-
+	_GetFilesCWD();
 }
 
 void FileSystem::mkdir(std::string newName)

@@ -67,7 +67,7 @@ int main(void) {
                 fs.ls();
                 break;
             case 3: // create
-
+				fs.create(commandArr[1]);
                 break;
             case 4: // cat
 
