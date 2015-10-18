@@ -32,6 +32,7 @@ public:
     void reset(char c = 0);  // Sets every element in char-array to 0
     int size() const;   // returns the size
     Block readBlock() const;    // Returns a copy of block
+	const char* data(void) const { return block; }
 
     /* Write a block */
     int writeBlock(const std::string &strBlock);
