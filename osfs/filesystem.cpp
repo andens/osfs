@@ -39,8 +39,6 @@ void FileSystem::format(void)
 		mMemblockDevice.writeBlock(i, data);
 	}
 
-	_root = Tree("");
-
 	_cwd = &_root;
 	_cwd->AddSubdirectory("first");
 	_cwd->AddSubdirectory("second");
@@ -53,26 +51,26 @@ void FileSystem::format(void)
 	//_cwdBlock = mMemblockDevice.readBlock(1);
 }
 
-// vector<string> FileSystem::split(const string &filePath, const char delim) const {
-//     vector<string> output;
-//     string cpy = filePath;
+vector<string> FileSystem::_Split(const string &filePath, const char delim) const {
+    vector<string> output;
+    string cpy = filePath;
 
-//     size_t end = cpy.find_last_of(delim);
-//     if (cpy.length() > end+1) {
-//         output.push_back(cpy.substr(end+1, cpy.length()));
-//     }
+    size_t end = cpy.find_last_of(delim);
+    if (cpy.length() > end+1) {
+        output.push_back(cpy.substr(end+1, cpy.length()));
+    }
 
-//     while (end != 0 && end!= std::string::npos) {
+    while (end != 0 && end!= std::string::npos) {
 
-//         cpy = cpy.substr(0, cpy.find_last_of('/'));
-//         //cout << cpy << endl;
-//         end = cpy.find_last_of(delim);
-//         output.push_back(cpy.substr(end+1, cpy.length()));
+        cpy = cpy.substr(0, cpy.find_last_of('/'));
+        //cout << cpy << endl;
+        end = cpy.find_last_of(delim);
+        output.push_back(cpy.substr(end+1, cpy.length()));
 
-//     }
+    }
 
-//     return output;
-// }
+    return output;
+}
 
 void FileSystem::ls(void) const
 {
@@ -90,24 +88,45 @@ void FileSystem::ls(void) const
 
 void FileSystem::cd(const string& directory)
 {
-	// if (directory.length() == 0)
-	// 	return;
+	if (directory.length() == 0)
+		return;
 
-	// vector<string> newPath = split(directory);
+	vector<string> newPath = _Split(directory);
 
-	// // Begins with '/': absoute path, relative otherwise
-	// if (directory[0] == '/')
-	// {
-	// 	DirectoryBlock currDirBlock = reinterpret_cast<DirectoryBlock>(mMemblockDevice.readBlock(1));
-	// 	for (unsigned i = 0; i < newPath.size(); ++i)
-	// 	{
+	// Begins with '/': absoute path, relative otherwise
+	if (directory[0] == '/')
+	{
+		Tree *oldWD = _cwd;
+		_cwd = &_root;
+		for (unsigned i = 0; i < newPath.size(); ++i)
+		{
+			_cwd = _cwd->GetDirectory(newPath[i]);
+			if (!_cwd)
+				break;
+		}
 
-	// 	}
-	// }
-	// else
-	// {
+		if (!_cwd)
+		{
+			_cwd = oldWD;
+			cout << "Could not find directory '" << directory << "'." << endl;
+		}
+	}
+	else
+	{
+		Tree *oldWD = _cwd;
+		for (unsigned i = 0; i < newPath.size(); ++i)
+		{
+			_cwd = _cwd->GetDirectory(newPath[i]);
+			if (!_cwd)
+				break;
+		}
 
-	// }
+		if (!_cwd)
+		{
+			_cwd = oldWD;
+			cout << "Could not find directory '" << directory << "'." << endl;
+		}
+	}
 }
 
 /*

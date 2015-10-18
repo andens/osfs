@@ -9,20 +9,21 @@
 class Tree
 {
 public:
-	Tree();
-	Tree(std::string name) : _name(name) {}
+	Tree() : _path("/") {};
+	Tree(std::string path) : _path(path) {};
 	void AddSubdirectory(std::string subDirectory);
 	void RemoveSubdirectory(std::string subDirectory, std::function<void(int)> RemoveFile);
 	void AddFile(int file);
 	Tree* GetDirectory(std::string subDirectory);
 	const std::vector<int>& GetFiles(void) const;
 	std::vector<std::string> GetSubdirectories(void) const;
+	std::string GetPath(void) const { return _path; }
 
 private:
 	void _Remove(std::function<void(int)> RemoveFile);
 
 private:
-	std::string _name;
+	std::string _path;
 	std::vector<int> _files;
 	std::map<std::string, Tree> _subDirectories;
 };
