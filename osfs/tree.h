@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <functional>
+#include <algorithm>
 
 class Tree
 {
@@ -17,7 +18,7 @@ public:
 	Tree* GetDirectory(std::string subDirectory);
 	const std::vector<int>& GetFiles(void) const;
 	std::vector<std::string> GetSubdirectories(void) const;
-
+	void RemoveFile(int file);
 private:
 	void _Remove(std::function<void(int)> RemoveFile);
 

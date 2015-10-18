@@ -31,6 +31,18 @@ void Tree::_Remove(function<void(int)> RemoveFile)
 
 }
 
+void Tree::RemoveFile(int file)
+{
+	for (int i = 0;i < _files.size();i++)
+	{
+		if (file == _files[i])
+		{
+			_files.erase(_files.begin()+i);
+			break;
+		}
+	}
+}
+
 void Tree::RemoveSubdirectory(string subDirectory, function<void(int)> RemoveFile)
 {
 	if (_subDirectories.find(subDirectory) == _subDirectories.end())

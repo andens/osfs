@@ -90,13 +90,29 @@ void FileSystem::ls(void) const
 
 void FileSystem::create(const std::string &filePath)
 {
-	
+	const vector<int>& files = _cwd->GetFiles();
+
+	for (int i = 0;i < files.size();i++)
+	{
+
+	}
+
 }
 
 void FileSystem::mkdir(std::string newName)
 {
 	_cwd->AddSubdirectory(newName);
 
+}
+
+void FileSystem::rm(const std::string &filePath)
+{
+	const vector<int>& files = _cwd->GetFiles();
+
+	for (int i = 0;i < files.size();i++)
+	{
+
+	}
 }
 
 void FileSystem::cd(const string& directory)
