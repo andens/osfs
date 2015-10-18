@@ -40,14 +40,14 @@ void Tree::RemoveSubdirectory(string subDirectory, function<void(int)> RemoveFil
 	_subDirectories.erase(subDirectory);
 }
 
-Tree& Tree::GetDirectory(string subDirectory)
+Tree* Tree::GetDirectory(string subDirectory)
 {
 	auto it = _subDirectories.find(subDirectory);
 
 	if (it == _subDirectories.end())
 		throw;
 
-	return it->second;
+	return &it->second;
 }
 
 void Tree::AddFile(int file)

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-FileSystem::FileSystem() : _cwd(_root) {
+FileSystem::FileSystem() : _cwd(&_root) {
 	format();
 }
 
@@ -39,16 +39,16 @@ void FileSystem::format(void)
 		mMemblockDevice.writeBlock(i, data);
 	}
 
-	//_root = Tree("");
+	_root = Tree("");
 
-	//_cwd = _root;
-	//_cwd.AddSubdirectory("first");
-	//_cwd.AddSubdirectory("second");
-	//_cwd.AddFile(1);
-	//_cwd = _cwd.GetDirectory("first");
-	//_cwd.AddFile(2);
-	//_cwd.AddFile(3);
-	//_cwd = _root;
+	_cwd = &_root;
+	_cwd->AddSubdirectory("first");
+	_cwd->AddSubdirectory("second");
+	_cwd->AddFile(1);
+	_cwd = _cwd->GetDirectory("first");
+	_cwd->AddFile(2);
+	_cwd->AddFile(3);
+	_cwd = &_root;
 
 	//_cwdBlock = mMemblockDevice.readBlock(1);
 }
@@ -76,16 +76,16 @@ void FileSystem::format(void)
 
 void FileSystem::ls(void) const
 {
-	//const vector<int>& files = _cwd.GetFiles();
-	//vector<string> subDirs = _cwd.GetSubdirectories();
+	const vector<int>& files = _cwd->GetFiles();
+	vector<string> subDirs = _cwd->GetSubdirectories();
 
-	//for_each(files.begin(), files.end(), [](int file) {
-	//	cout << "File: " << file << endl;
-	//});
+	for_each(files.begin(), files.end(), [](int file) {
+		cout << "File: " << file << endl;
+	});
 
-	//for_each(subDirs.begin(), subDirs.end(), [](string dir) {
-	//	cout << "Subdir: " << dir << endl;
-	//});
+	for_each(subDirs.begin(), subDirs.end(), [](string dir) {
+		cout << "Subdir: " << dir << endl;
+	});
 }
 
 void FileSystem::cd(const string& directory)
