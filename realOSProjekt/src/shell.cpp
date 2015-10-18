@@ -54,8 +54,7 @@ int main(void) {
                 // Call fileSystem.format()
                 break;
             case 2: // ls
-                cout << "Listing directory" << endl;
-                // Call filesystem.ls()
+                fs.ls();
                 break;
             case 3: // create
 

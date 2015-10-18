@@ -57,7 +57,7 @@ public:
      * Remember to remove 'const' if needed.
      */
     void format(void);
-    std::string ls() const;
+    void ls() const;
     std::string ls(const std::string &path) const;  // optional
     std::string create(const std::string &filePath);
     std::string cat(std::string &fileName) const;

@@ -54,3 +54,17 @@ void Tree::AddFile(int file)
 {
 	_files.push_back(file);
 }
+
+const vector<int>& Tree::GetFiles(void) const
+{
+	return _files;
+}
+
+vector<string> Tree::GetSubdirectories(void) const
+{
+	vector<string> subDirs;
+	for (auto i = _subDirectories.begin(); i != _subDirectories.end(); ++i)
+		subDirs.push_back(i->first);
+
+	return subDirs;
+}

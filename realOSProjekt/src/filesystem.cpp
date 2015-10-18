@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -47,6 +48,7 @@ void FileSystem::format(void)
 	_cwd = _cwd.GetDirectory("first");
 	_cwd.AddFile(2);
 	_cwd.AddFile(3);
+	_cwd = _root;
 
 	//_cwdBlock = mMemblockDevice.readBlock(1);
 }
@@ -71,6 +73,20 @@ void FileSystem::format(void)
 
 //     return output;
 // }
+
+void FileSystem::ls(void) const
+{
+	const vector<int>& files = _cwd.GetFiles();
+	vector<string> subDirs = _cwd.GetSubdirectories();
+
+	for_each(files.begin(), files.end(), [](int file) {
+		cout << "File: " << file << endl;
+	});
+
+	for_each(subDirs.begin(), subDirs.end(), [](string dir) {
+		cout << "Subdir: " << dir << endl;
+	});
+}
 
 void FileSystem::cd(const string& directory)
 {
