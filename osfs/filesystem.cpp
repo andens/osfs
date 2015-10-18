@@ -16,12 +16,12 @@ void FileSystem::format(void)
 
 	// Create the master block
 	MasterBlock masterBlock;
-	masterBlock.FirstEmptyBlock = 2;
+	masterBlock.FirstEmptyBlock = 1;
 	mMemblockDevice.writeBlock(0, reinterpret_cast<char*>(&masterBlock));
 
 	// Empty block initialization.
 	// Have the empty blocks point to the next.
-	for (unsigned i = 2; i < 250; ++i)
+	for (unsigned i = 1; i < 250; ++i)
 	{
 		char data[512];
 		unsigned nextEmptyBlock = i + 1;
@@ -29,8 +29,6 @@ void FileSystem::format(void)
 		memcpy(data, &nextEmptyBlock, sizeof(unsigned));
 		mMemblockDevice.writeBlock(i, data);
 	}
-
-	cd("/");
 
 	_cwd = &_root;
 	_cwd->AddSubdirectory("first");
@@ -40,6 +38,8 @@ void FileSystem::format(void)
 	_cwd->AddFile(2);
 	_cwd->AddFile(3);
 	_cwd = &_root;
+
+	cd("/");
 }
 
 vector<string> FileSystem::_Split(const string &filePath, const char delim) const {
@@ -65,15 +65,20 @@ vector<string> FileSystem::_Split(const string &filePath, const char delim) cons
 
 void FileSystem::ls(void) const
 {
-	const vector<int>& files = _cwd->GetFiles();
 	vector<string> subDirs = _cwd->GetSubdirectories();
-
-	for_each(files.begin(), files.end(), [](int file) {
-		cout << "File: " << file << endl;
-	});
+	if (subDirs.size() > 0)
+		cout << "Directories:" << endl;
 
 	for_each(subDirs.begin(), subDirs.end(), [](string dir) {
-		cout << "Subdir: " << dir << endl;
+		cout << dir << "/" << endl;
+	});
+
+	const vector<int>& files = _cwd->GetFiles();
+	if (files.size() > 0)
+		cout << "Files:" << endl;
+
+	for_each(_cwdFiles.begin(), _cwdFiles.end(), [](const pair<int, FileBlock>& file) {
+		cout << file.second.Name << " (" << file.second.FileSize << " bytes)" << endl;
 	});
 }
 
