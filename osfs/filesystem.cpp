@@ -88,6 +88,17 @@ void FileSystem::ls(void) const
 	});
 }
 
+void FileSystem::create(const std::string &filePath)
+{
+	
+}
+
+void FileSystem::mkdir(std::string newName)
+{
+	_cwd->AddSubdirectory(newName);
+
+}
+
 void FileSystem::cd(const string& directory)
 {
 	// if (directory.length() == 0)
