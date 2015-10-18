@@ -75,7 +75,8 @@ public:
     std::string chmod(int permission, const std::string &file);
 
     /* Add your own member-functions if needed */
-    //std::vector<std::string> split(const std::string &filePath, const char delim = '/') const;
+	std::string GetCWD(void) const { return _cwd->GetPath(); }
+    std::vector<std::string> _Split(const std::string &filePath, const char delim = '/') const;
     //void GetChildren(unsigned directoryBlock, Block **directories, Block **files) const;
 };
 
