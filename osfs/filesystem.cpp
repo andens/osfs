@@ -19,15 +19,6 @@ void FileSystem::format(void)
 	masterBlock.FirstEmptyBlock = 2;
 	mMemblockDevice.writeBlock(0, reinterpret_cast<char*>(&masterBlock));
 
-	// Create the root directory
-	// DirectoryBlock rootDirectory;
-	// strcpy(rootDirectory.Name, "");
-	// rootDirectory.ParentDirectory = 0;
-	// rootDirectory.NextDirectoryBlock = 0;
-	// rootDirectory.ChildDirectoryCount = 0;
-	// rootDirectory.FileCount = 0;
-	// mMemblockDevice.writeBlock(1, reinterpret_cast<char*>(&rootDirectory));
-
 	// Empty block initialization.
 	// Have the empty blocks point to the next.
 	for (unsigned i = 2; i < 250; ++i)
@@ -47,8 +38,6 @@ void FileSystem::format(void)
 	_cwd->AddFile(2);
 	_cwd->AddFile(3);
 	_cwd = &_root;
-
-	//_cwdBlock = mMemblockDevice.readBlock(1);
 }
 
 vector<string> FileSystem::_Split(const string &filePath, const char delim) const {
@@ -155,58 +144,3 @@ void FileSystem::cd(const string& directory)
 		}
 	}
 }
-
-/*
-Screw this. Vi lagrar katalogstruktur i ett träd i arbetsminnet.
-Varje nod är en katalog som innehåller andra noder (underkataloger).
-Varje nod har även en array av int som motsvarar filblocken på disk.
-När vi avslutar sparar vi strukturen som vilken annan fil som helst,
-fast vi kan ju hårdkoda filblocket till block med index 1.
-*/
-// void FileSystem::GetChildren(unsigned directoryBlock, Block **directories, Block **files) const
-// {
-// 	Block theDir = mMemblockDevice.readBlock(directoryBlock);
-// 	unsigned directoryCount = reinterpret_cast<DirectoryBlock>(theDir).ChildDirectoryCount;
-// 	unsigned fileCount = reinterpret_cast<DirectoryBlock>(theDir).FileCount;
-// 	unsigned nextDirectoryBlock = reinterpret_cast<DirectoryBlock>(theDir).NextDirectoryBlock;
-
-// 	if (directories)
-// 	{
-// 		*directories = new Block[directoryCount];
-// 	}
-
-// 	if (files)
-// 	{
-// 		*files = new Block[fileCount];
-// 	}
-
-// 	int byteOffset = 32; // Skip metadata for first block.
-// 	unsigned totalChildCount = directoryCount + fileCount;
-// 	unsigned childrenTraversed = 0;
-// 	for (unsigned i = 0; i < totalChildCount; ++i)
-// 	{
-// 		unsigned index;
-// 		memcpy(&index, (char*)&theDir + byteOffset, sizeof(unsigned));
-
-// 		if (childrenTraversed < directoryCount) // We are on a directory
-// 		{
-// 			if (directories)
-// 				*directories[childrenTraversed] = mMemblockDevice.readBlock(index);
-// 		}
-// 		else // We are on a file
-// 		{
-// 			if (files)
-// 				*files[childrenTraversed - directoryCount] = mMemblockDevice.readBlock(index);
-// 		}
-
-// 		childrenTraversed++;
-// 		byteOffset += 4;
-
-// 		if (byteOffset >= 512)
-// 		{
-// 			theDir = mMemblockDevice.readBlock(nextDirectoryBlock);
-// 			byteOffset = 4; // New block, skip pointer to next block.
-// 			memcpy(&nextDirectoryBlock, (char*)&theDir, sizeof(unsigned)); // Get the pointer to the next block
-// 		}
-// 	}
-// }

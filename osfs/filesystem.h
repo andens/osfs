@@ -11,11 +11,9 @@ class FileSystem
 private:
     MemBlockDevice mMemblockDevice;
     // Here you can add your own data structures
-    //unsigned _cwdBlock;
-    Block *_cwdDirectories = nullptr;
-    Block *_cwdFiles = nullptr;
     Tree _root;
 	Tree* _cwd = nullptr;
+	Block *_cwdFiles = nullptr;
 
 private:
     struct MasterBlock
@@ -37,16 +35,6 @@ private:
         unsigned FileSize;
         unsigned PayloadBlocks[122];
     };
-
-    // struct DirectoryBlock
-    // {
-    //     char Name[16];
-    //     unsigned ParentDirectory;
-    //     unsigned NextDirectoryBlock;
-    //     unsigned ChildDirectoryCount;
-    //     unsigned FileCount;
-    //     unsigned Children[120];
-    // };
 
 public:
     FileSystem();
@@ -77,7 +65,6 @@ public:
     /* Add your own member-functions if needed */
 	std::string GetCWD(void) const { return _cwd->GetPath(); }
     std::vector<std::string> _Split(const std::string &filePath, const char delim = '/') const;
-    //void GetChildren(unsigned directoryBlock, Block **directories, Block **files) const;
 };
 
 #endif // FILESYSTEM_H
