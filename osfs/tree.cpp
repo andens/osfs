@@ -2,16 +2,11 @@
 
 using namespace std;
 
-Tree::Tree()
-{
-
-}
-
 void Tree::AddSubdirectory(string subDirectory)
 {
 	if (_subDirectories.find(subDirectory) == _subDirectories.end())
 	{
-		_subDirectories[subDirectory] = Tree(subDirectory);
+		_subDirectories[subDirectory] = Tree((_path == "/" ? "/" : _path) + subDirectory);
 	}
 }
 
@@ -57,7 +52,7 @@ Tree* Tree::GetDirectory(string subDirectory)
 	auto it = _subDirectories.find(subDirectory);
 
 	if (it == _subDirectories.end())
-		throw;
+		return nullptr;
 
 	return &it->second;
 }
