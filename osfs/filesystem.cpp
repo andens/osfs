@@ -95,14 +95,9 @@ void FileSystem::_ListDirectory(const Tree *directory) const
 void FileSystem::create(const std::string &filePath)
 {
 	//Kolla ifall filen redan finns
-	for (auto i = _cwdFiles.begin();i != _cwdFiles.end();i++)
-	{
-		if(i->second.Name == filePath)
-		{
-			cout << "File does already exists" << endl;
-			return;
-		}
-	}
+	string file, dir;
+	Tree* tempTree = const_cast<Tree*>(_DirectoryOf(dir));
+	map<int, FileBlock> tempFileBlock;
 
 	if (strcmp(&filePath[filePath.length() - 1], "/") == 0)
 	{
@@ -112,26 +107,47 @@ void FileSystem::create(const std::string &filePath)
 
 	int index = filePath.find_last_of("/");
 	if (index == -1)
+	{
 		// Just filename, create file at _cwd
-		int hej;
+		file = filePath;
+		tempTree = _cwd;
+		tempFileBlock = _cwdFiles;
+	}
 	else
 	{
-		string dir = filePath.substr(0, index);
+		dir = filePath.substr(0, index);
 		cout << "Dir: " << dir << endl;
-		string file = filePath.substr(index + 1);
+		file = filePath.substr(index + 1);
 		cout << "File: " << file << endl;
+
+	
+	if (tempTree == NULL)
+	{
+		mkdir(dir);
+		tempTree = const_cast<Tree*>(_DirectoryOf(dir));
+	}
+	ls();
+		_GetFileBlocks(tempTree, tempFileBlock);
+
+	}
+	//Creating new FileBlock
+	for (auto i = tempFileBlock.begin();i != tempFileBlock.end();i++)
+	{
+		if(i->second.Name == file)
+		{
+			cout << "File does already exists" << endl;
+			return;
+		}
 	}
 
-	//Creating new FileBlock
-
 	FileBlock newFile;
-	if(filePath.size()>15)
+	if(file.size()>15)
 	{
 		cout << "Name is too big" << endl;
 		return;
 	}
-	
-	strncpy_s(newFile.Name,filePath.c_str(),filePath.size());
+
+	strncpy_s(newFile.Name,file.c_str(),file.size());
 	newFile.Access = 0;
 	newFile.FileSize = 0;
 	for (int i = 0;i < 122;i++)
@@ -155,17 +171,30 @@ void FileSystem::create(const std::string &filePath)
 	mMemblockDevice.writeBlock(0, (char*)&masterTemp);
 	//step tre skriva till sagda plats
 	mMemblockDevice.writeBlock(BlockSlott, (char*)&newFile);
-	//lägg till fil i cwd
-	_cwd->AddFile(BlockSlott);
 
-	_GetFilesCWD();
+	//lägg till fil i directory
+	tempTree->AddFile(BlockSlott);
+
 }
 
 void FileSystem::mkdir(std::string newName)
 {
+	
+	Tree* _temp = _cwd;
 
-	_cwd->AddSubdirectory(newName);
-
+	vector<string> path = _Split(newName);
+	
+	if (newName[0] == '/')
+	{
+		_cwd = &_root; //Kek
+	}
+	
+	for (int i = 0; i < path.size(); i++)
+	{
+		_cwd->AddSubdirectory(path[i]);
+		cd(path[i]);
+	}
+	_cwd = _temp;
 }
 
 void FileSystem::rm(const std::string &filePath)
