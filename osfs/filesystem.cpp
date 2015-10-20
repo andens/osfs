@@ -119,7 +119,7 @@ void FileSystem::create(const std::string &filePath)
 	{
 		if(i->second.Name == filePath)
 		{
-			cout << "File already finns" << endl;
+			cout << "File does already exists" << endl;
 			return;
 		}
 	}
@@ -165,6 +165,7 @@ void FileSystem::create(const std::string &filePath)
 
 void FileSystem::mkdir(std::string newName)
 {
+
 	_cwd->AddSubdirectory(newName);
 
 }
