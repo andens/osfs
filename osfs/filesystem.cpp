@@ -285,9 +285,55 @@ const Tree* FileSystem::_DirectoryOf(const string& path) const
 	return walker;
 }
 
+// TODO: Don't forget to remove payloads!
 void FileSystem::_RemoveFile(int file)
 {
-	cout << "Remove file " << file << endl;
+	MasterBlock mb;
+	Block b = mMemblockDevice.readBlock(0);
+	memcpy(&mb, b.data(), 512);
+
+	unsigned firstEmptyBeforeFile = 0;
+	unsigned walker = mb.FirstEmptyBlock;
+	
+	while (walker < file && walker > 0)
+	{
+		firstEmptyBeforeFile = walker;
+
+		// Go to next empty block. Just copy the next block pointer
+		// into the walker variable.
+		b = mMemblockDevice.readBlock(walker);
+		memcpy(&walker, b.data(), 4);
+	}
+
+	// The file block
+	b = mMemblockDevice.readBlock(file);
+
+	// No empty block before file
+	if (firstEmptyBeforeFile == 0)
+	{
+		// Since we didn't find a first empty block before the file, mb.FirstEmptyBlock
+		// is the next empty block after the file. The file we are removing should
+		// therefore point to that one.
+		char tempBuffer[512];
+		memcpy(tempBuffer, &mb.FirstEmptyBlock, 4);
+		mMemblockDevice.writeBlock(file, tempBuffer);
+
+		// The file block we are removing will be new first empty block.
+		mb.FirstEmptyBlock = file;
+		mMemblockDevice.writeBlock(0, (char*)&mb);
+	}
+	// Found first empty block before file from walking
+	else
+	{
+		// Link empty block before to file
+		char tempBuffer[512];
+		memcpy(tempBuffer, &file, 4);
+		mMemblockDevice.writeBlock(firstEmptyBeforeFile, tempBuffer);
+
+		// Link file to walker (walker is now the first empty after)
+		memcpy(tempBuffer, &walker, 4);
+		mMemblockDevice.writeBlock(file, tempBuffer);
+	}
 }
 
 // [KLART]
