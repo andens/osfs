@@ -122,20 +122,17 @@ void FileSystem::create(const std::string &filePath)
 	else
 	{
 		dir = filePath.substr(0, index);
-		cout << "Dir: " << dir << endl;
 		file = filePath.substr(index + 1);
-		cout << "File: " << file << endl;
 
-	
-	if (tempTree == NULL)
-	{
-		mkdir(dir);
-		tempTree = const_cast<Tree*>(_DirectoryOf(dir));
-	}
-	ls();
+		if (tempTree == NULL)
+		{
+			mkdir(dir);
+			tempTree = const_cast<Tree*>(_DirectoryOf(dir));
+		}
+
 		_GetFileBlocks(tempTree, tempFileBlock);
-
 	}
+
 	//Creating new FileBlock
 	for (auto i = tempFileBlock.begin();i != tempFileBlock.end();i++)
 	{
