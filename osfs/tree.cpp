@@ -6,7 +6,8 @@ void Tree::AddSubdirectory(string subDirectory)
 {
 	if (_subDirectories.find(subDirectory) == _subDirectories.end())
 	{
-		_subDirectories[subDirectory] = Tree((_path == "/" ? "/" : _path) + subDirectory, this);
+		//_subDirectories[subDirectory] = Tree((_path == "/" ? "/" : _path) + subDirectory, this);
+		_subDirectories[subDirectory] = Tree(_path + ((_path == "/") ? "" : "/") + subDirectory, this);
 	}
 }
 

@@ -45,19 +45,25 @@ vector<string> FileSystem::_Split(const string &filePath, const char delim) cons
     vector<string> output;
     string cpy = filePath;
 
-    size_t end = cpy.find_last_of(delim);
-    if (cpy.length() > end+1) {
-        output.push_back(cpy.substr(end+1, cpy.length()));
-    }
+	while (cpy.length())
+	{
+		int firstSlash = cpy.find_first_of(delim);
 
-    while (end != 0 && end!= std::string::npos) {
+		if (firstSlash == 0)
+		{
+			cpy.erase(0, 1);
+			continue;
+		}
 
-        cpy = cpy.substr(0, cpy.find_last_of('/'));
-        //cout << cpy << endl;
-        end = cpy.find_last_of(delim);
-        output.push_back(cpy.substr(end+1, cpy.length()));
+		if (firstSlash == -1)
+		{
+			output.push_back(cpy);
+			break;
+		}
 
-    }
+		output.push_back(cpy.substr(0, firstSlash));
+		cpy = cpy.substr(firstSlash + 1);
+	}
 
     return output;
 }
