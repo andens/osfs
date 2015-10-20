@@ -69,27 +69,7 @@ void FileSystem::ls(void) const
 
 void FileSystem::ls(const string &path) const
 {
-	//Tree *oldWD = _cwd;
-
-	//vector<string> newPath = _Split(path);
-
-	//Tree *walker = _cwd;
-	//for (unsigned i = 0; i < newPath.size(); ++i)
-	//{
-	//	walker = walker->GetDirectory(newPath[i]);
-	//	if (!walker)
-	//		break;
-	//}
-
-	//// If _cwd is invalid it means that a certain subdirectory was not found.
-	//// We return to the one we were in before starting.
-	//if (!walker)
-	//{
-	//	cout << "Could not find directory '" << path << "'." << endl;
-	//	return;
-	//}
-
-	//_ListDirectory(walker);
+	_ListDirectory(_DirectoryOf(path));
 }
 
 void FileSystem::_ListDirectory(const Tree *directory) const
@@ -122,6 +102,24 @@ void FileSystem::create(const std::string &filePath)
 			cout << "File does already exists" << endl;
 			return;
 		}
+	}
+
+	if (strcmp(&filePath[filePath.length() - 1], "/") == 0)
+	{
+		cout << "Path cannot end with a directory separator" << endl;
+		return;
+	}
+
+	int index = filePath.find_last_of("/");
+	if (index == -1)
+		// Just filename, create file at _cwd
+		int hej;
+	else
+	{
+		string dir = filePath.substr(0, index);
+		cout << "Dir: " << dir << endl;
+		string file = filePath.substr(index + 1);
+		cout << "File: " << file << endl;
 	}
 
 	//Creating new FileBlock
