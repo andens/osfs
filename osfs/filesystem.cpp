@@ -289,3 +289,29 @@ void FileSystem::_RemoveFile(int file)
 {
 	cout << "Remove file " << file << endl;
 }
+
+// [KLART]
+// format
+// create <filnamn>
+// ls
+// mkdir <katalog>
+// cd <katalog>
+// hantera absoluta och relativa sökvägar
+
+// [KVAR]
+// createImage <filnamn> (spara systemet på datorns hårddisk)
+// restoreImage <filnamn>
+// cat <filnamn> skriv ut innehåll på skärm
+// copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
+// pwd
+// rm <filnamn> tar bort en given fil
+// append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
+// rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
+// katalognamn . och ..
+// chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
+// cat med access
+// write med access
+
+// Vad vi gjort annorlunda:
+// Lagt till en funktion på Block som returnerar data
+// Tree
