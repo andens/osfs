@@ -63,6 +63,7 @@ private:
 	void _GetFileBlocks(const Tree *directory, std::map<int, FileBlock>& fileBlocks) const;
 	void _GetFilesCWD(void);
 	void _ListDirectory(const Tree *directory) const;
+	const Tree* _DirectoryOf(const std::string& path) const;
 
 private:
     MemBlockDevice mMemblockDevice;
