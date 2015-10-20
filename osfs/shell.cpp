@@ -6,11 +6,11 @@
 using namespace std;
 
 const int MAXCOMMANDS = 8;
-const int NUMAVAILABLECOMMANDS = 15;
+const int NUMAVAILABLECOMMANDS = 16;
 
 string availableCommands[NUMAVAILABLECOMMANDS] = {
     "quit","format","ls","create","cat","createImage","restoreImage",
-    "rm","copy","append","rename","mkdir","cd","pwd","help"
+    "rm","copy","append","rename","mkdir","cd","pwd","help", "rmdir"
 };
 
 // Sets up with the filesystem with some default data so that we have something
@@ -50,6 +50,9 @@ int main(void) {
 		cout << "$ ";
         getline(cin, userCommand);
 
+		for (unsigned i = 0; i < MAXCOMMANDS; ++i)
+			commandArr[i] = "";
+
         int nrOfCommands = parseCommandString(userCommand, commandArr);
         if (nrOfCommands > 0) {
 
@@ -73,7 +76,7 @@ int main(void) {
 				fs.create(commandArr[1]);
                 break;
             case 4: // cat
-
+				
                 break;
             case 5: // createImage
 
@@ -113,6 +116,10 @@ int main(void) {
                 cout << help() << endl;
                 break;
 
+			case 15: // rmdir
+				fs.rmdir(commandArr[1]);
+				break;
+
             default:
                 cout << "Unknown command: " << commandArr[0] << endl;
 
@@ -130,10 +137,6 @@ int parseCommandString(const string &userCommand, string strArr[]) {
         ssin >> strArr[counter];
         counter++;
     }
-	while (counter < MAXCOMMANDS)
-	{
-		strArr[counter++] = "";
-	}
     if (strArr[0] == "") {
         counter = 0;
     }

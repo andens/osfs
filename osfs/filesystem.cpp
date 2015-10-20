@@ -197,6 +197,19 @@ void FileSystem::mkdir(std::string newName)
 	_cwd = _temp;
 }
 
+void FileSystem::rmdir(string directory)
+{
+	Tree *d = const_cast<Tree*>(_DirectoryOf(directory));
+	Tree *p = d ? d->Parent() : nullptr;
+	if (p)
+	{
+		string remove = *d - *p;
+		p->RemoveSubdirectory(remove, [this](int file) {
+			_RemoveFile(file);
+		});
+	}
+}
+
 void FileSystem::rm(const std::string &filePath)
 {
 	const vector<int>& files = _cwd->GetFiles();
@@ -267,4 +280,9 @@ const Tree* FileSystem::_DirectoryOf(const string& path) const
 	}
 
 	return walker;
+}
+
+void FileSystem::_RemoveFile(int file)
+{
+	cout << "Remove file " << file << endl;
 }

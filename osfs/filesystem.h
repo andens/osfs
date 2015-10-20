@@ -25,6 +25,7 @@ public:
 	//std::string createImage(const std::string &saveFile) const;
 	//std::string restoreImage(const std::string &saveFile) const;
 	void mkdir(std::string newName);
+	void rmdir(std::string directory);
 	void rm(const std::string &filePath);
 	//std::string copy(const std::string &source, const std::string &dest);
 	void cd(const std::string& directory);
@@ -64,6 +65,7 @@ private:
 	void _GetFilesCWD(void);
 	void _ListDirectory(const Tree *directory) const;
 	const Tree* _DirectoryOf(const std::string& path) const;
+	void _RemoveFile(int file);
 
 private:
     MemBlockDevice mMemblockDevice;
