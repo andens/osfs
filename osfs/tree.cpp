@@ -6,7 +6,7 @@ void Tree::AddSubdirectory(string subDirectory)
 {
 	if (_subDirectories.find(subDirectory) == _subDirectories.end())
 	{
-		_subDirectories[subDirectory] = Tree((_path == "/" ? "/" : _path) + subDirectory);
+		_subDirectories[subDirectory] = Tree((_path == "/" ? "/" : _path) + subDirectory, this);
 	}
 }
 
@@ -74,4 +74,12 @@ vector<string> Tree::GetSubdirectories(void) const
 		subDirs.push_back(i->first);
 
 	return subDirs;
+}
+
+std::string Tree::operator-(const Tree& rhs)
+{
+	if (rhs._path.length() > _path.length())
+		return "";
+
+	return _path.substr(rhs._path.length());
 }
