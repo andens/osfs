@@ -19,20 +19,20 @@ public:
 
 	void format(void);
 	void ls() const;
-	std::string ls(const std::string &path) const;  // optional
+	void ls(const std::string &path) const;  // optional
 	void create(const std::string &filePath);
-	std::string cat(std::string &fileName) const;
-	std::string createImage(const std::string &saveFile) const;
-	std::string restoreImage(const std::string &saveFile) const;
+	//std::string cat(std::string &fileName) const;
+	//std::string createImage(const std::string &saveFile) const;
+	//std::string restoreImage(const std::string &saveFile) const;
 	void mkdir(std::string newName);
 	void rm(const std::string &filePath);
-	std::string copy(const std::string &source, const std::string &dest);
+	//std::string copy(const std::string &source, const std::string &dest);
 	void cd(const std::string& directory);
 
 	/* Optional */
-	std::string append(const std::string &source, const std::string &app);
-	std::string rename(const std::string &source, const std::string &newName);
-	std::string chmod(int permission, const std::string &file);
+	//std::string append(const std::string &source, const std::string &app);
+	//std::string rename(const std::string &source, const std::string &newName);
+	//std::string chmod(int permission, const std::string &file);
 
 	/* Add your own member-functions if needed */
 	std::string GetCWD(void) const { return _cwd->GetPath(); }
@@ -60,7 +60,9 @@ private:
 	};
 
 private:
+	void _GetFileBlocks(const Tree *directory, std::map<int, FileBlock>& fileBlocks) const;
 	void _GetFilesCWD(void);
+	void _ListDirectory(const Tree *directory) const;
 
 private:
     MemBlockDevice mMemblockDevice;

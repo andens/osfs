@@ -64,7 +64,10 @@ int main(void) {
                 // Call fileSystem.format()
                 break;
             case 2: // ls
-                fs.ls();
+				if (commandArr[1] == "")
+					fs.ls();
+				else
+					fs.ls(commandArr[1]);
                 break;
             case 3: // create
 				fs.create(commandArr[1]);
@@ -127,6 +130,10 @@ int parseCommandString(const string &userCommand, string strArr[]) {
         ssin >> strArr[counter];
         counter++;
     }
+	while (counter < MAXCOMMANDS)
+	{
+		strArr[counter++] = "";
+	}
     if (strArr[0] == "") {
         counter = 0;
     }

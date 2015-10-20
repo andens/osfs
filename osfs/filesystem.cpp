@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string.h>
 #include <algorithm>
+#include <Windows.h>
 
 using namespace std;
 
@@ -63,19 +64,50 @@ vector<string> FileSystem::_Split(const string &filePath, const char delim) cons
 
 void FileSystem::ls(void) const
 {
-	vector<string> subDirs = _cwd->GetSubdirectories();
-	if (subDirs.size() > 0)
-		cout << "Directories:" << endl;
+	_ListDirectory(_cwd);
+}
 
+void FileSystem::ls(const string &path) const
+{
+	Tree *oldWD = _cwd;
+
+	vector<string> newPath = _Split(path);
+
+	Tree *walker = _cwd;
+	for (unsigned i = 0; i < newPath.size(); ++i)
+	{
+		walker = walker->GetDirectory(newPath[i]);
+		if (!walker)
+			break;
+	}
+
+	// If _cwd is invalid it means that a certain subdirectory was not found.
+	// We return to the one we were in before starting.
+	if (!walker)
+	{
+		cout << "Could not find directory '" << path << "'." << endl;
+		return;
+	}
+
+	_ListDirectory(walker);
+}
+
+void FileSystem::_ListDirectory(const Tree *directory) const
+{
+	map<int, FileBlock> fileBlocks;
+	_GetFileBlocks(directory, fileBlocks);
+	
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, 259);
+
+	vector<string> subDirs = directory->GetSubdirectories();
 	for_each(subDirs.begin(), subDirs.end(), [](string dir) {
 		cout << dir << "/" << endl;
 	});
 
-	const vector<int>& files = _cwd->GetFiles();
-	if (files.size() > 0)
-		cout << "Files:" << endl;
+	SetConsoleTextAttribute(hConsole, 15);
 
-	for_each(_cwdFiles.begin(), _cwdFiles.end(), [](const pair<int, FileBlock>& file) {
+	for_each(fileBlocks.begin(), fileBlocks.end(), [](const pair<int, FileBlock>& file) {
 		cout << file.second.Name << " (" << file.second.FileSize << " bytes)" << endl;
 	});
 }
@@ -184,13 +216,19 @@ void FileSystem::cd(const string& directory)
 
 void FileSystem::_GetFilesCWD(void)
 {
-	_cwdFiles.clear();
-	
-	auto& files = _cwd->GetFiles();
-	for_each(files.begin(), files.end(), [this](int file) {
+	_GetFileBlocks(_cwd, _cwdFiles);
+}
+
+void FileSystem::_GetFileBlocks(const Tree *directory, map<int, FileBlock>& fileBlocks) const
+{
+	fileBlocks.clear();
+
+	auto& files = directory->GetFiles();
+
+	for_each(files.begin(), files.end(), [this, &fileBlocks](int file) {
 		Block blockData = mMemblockDevice.readBlock(file);
 		FileBlock block;
 		memcpy(&block, blockData.data(), 512);
-		_cwdFiles[file] = block;
+		fileBlocks[file] = block;
 	});
 }
