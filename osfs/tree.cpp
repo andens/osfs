@@ -47,7 +47,7 @@ void Tree::RemoveSubdirectory(string subDirectory, function<void(int)> RemoveFil
 	_subDirectories.erase(subDirectory);
 }
 
-Tree* Tree::GetDirectory(string subDirectory)
+const Tree* Tree::GetDirectory(string subDirectory) const
 {
 	auto it = _subDirectories.find(subDirectory);
 

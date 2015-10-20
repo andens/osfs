@@ -69,27 +69,27 @@ void FileSystem::ls(void) const
 
 void FileSystem::ls(const string &path) const
 {
-	Tree *oldWD = _cwd;
+	//Tree *oldWD = _cwd;
 
-	vector<string> newPath = _Split(path);
+	//vector<string> newPath = _Split(path);
 
-	Tree *walker = _cwd;
-	for (unsigned i = 0; i < newPath.size(); ++i)
-	{
-		walker = walker->GetDirectory(newPath[i]);
-		if (!walker)
-			break;
-	}
+	//Tree *walker = _cwd;
+	//for (unsigned i = 0; i < newPath.size(); ++i)
+	//{
+	//	walker = walker->GetDirectory(newPath[i]);
+	//	if (!walker)
+	//		break;
+	//}
 
-	// If _cwd is invalid it means that a certain subdirectory was not found.
-	// We return to the one we were in before starting.
-	if (!walker)
-	{
-		cout << "Could not find directory '" << path << "'." << endl;
-		return;
-	}
+	//// If _cwd is invalid it means that a certain subdirectory was not found.
+	//// We return to the one we were in before starting.
+	//if (!walker)
+	//{
+	//	cout << "Could not find directory '" << path << "'." << endl;
+	//	return;
+	//}
 
-	_ListDirectory(walker);
+	//_ListDirectory(walker);
 }
 
 void FileSystem::_ListDirectory(const Tree *directory) const
@@ -181,34 +181,9 @@ void FileSystem::rm(const std::string &filePath)
 
 void FileSystem::cd(const string& directory)
 {
-	if (directory.length() == 0)
-		return;
-
-	vector<string> newPath = _Split(directory);
-
-	Tree *oldWD = _cwd;
-
-	// Begins with '/': absoute path, relative otherwise. In case of absolute
-	// we want to start from the root instead of the current directory.
-	if (directory[0] == '/')
-		_cwd = &_root;
-
-	// Attempt to navigate to every new subdirectory.
-	for (unsigned i = 0; i < newPath.size(); ++i)
-	{
-		_cwd = _cwd->GetDirectory(newPath[i]);
-		if (!_cwd)
-			break;
-	}
-
-	// If _cwd is invalid it means that a certain subdirectory was not found.
-	// We return to the one we were in before starting.
-	if (!_cwd)
-	{
-		_cwd = oldWD;
-		cout << "Could not find directory '" << directory << "'." << endl;
-		return;
-	}
+	const Tree *newDir = _DirectoryOf(directory);
+	if (newDir)
+		_cwd = const_cast<Tree*>(newDir);
 
 	// If everything worked out properly, _cwd will now be the correct directory.
 	_GetFilesCWD();
@@ -231,4 +206,37 @@ void FileSystem::_GetFileBlocks(const Tree *directory, map<int, FileBlock>& file
 		memcpy(&block, blockData.data(), 512);
 		fileBlocks[file] = block;
 	});
+}
+
+const Tree* FileSystem::_DirectoryOf(const string& path) const
+{
+	if (path.length() == 0)
+		return nullptr;
+
+	vector<string> newPath = _Split(path);
+
+	const Tree *walker = _cwd;
+
+	// Begins with '/': absoute path, relative otherwise. In case of absolute
+	// we want to start from the root instead of the current directory.
+	if (path[0] == '/')
+		walker = &_root;
+
+	// Attempt to navigate to every new subdirectory.
+	for (unsigned i = 0; i < newPath.size(); ++i)
+	{
+		walker = walker->GetDirectory(newPath[i]);
+		if (!walker)
+			break;
+	}
+
+	// If walker is invalid it means that a certain subdirectory was not found.
+	// We return to the one we were in before starting.
+	if (!walker)
+	{
+		cout << "Could not find directory '" << path << "'." << endl;
+		return nullptr;
+	}
+
+	return walker;
 }
