@@ -98,7 +98,12 @@ void FileSystem::_ListDirectory(const Tree *directory) const
 
 	SetConsoleTextAttribute(hConsole, 15);
 
-	for_each(fileBlocks.begin(), fileBlocks.end(), [](const pair<unsigned char, FileBlock>& file) {
+	vector<pair<unsigned char, FileBlock>> files;
+	files.insert(files.begin(), fileBlocks.begin(), fileBlocks.end());
+	sort(files.begin(), files.end(), [](const pair<unsigned char, FileBlock>& a, const pair<unsigned char, FileBlock>& b) {
+		return strcmp(a.second.Name, b.second.Name) < 0;
+	});
+	for_each(files.begin(), files.end(), [](const pair<unsigned char, FileBlock>& file) {
 		cout << file.second.Name << " (" << file.second.FileSize << " bytes)" << endl;
 	});
 }
