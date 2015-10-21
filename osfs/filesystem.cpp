@@ -23,17 +23,6 @@ void FileSystem::format(void)
 	masterBlock.EmptyBlockCount = 250 - numHardCodedBlocks;
 	mMemblockDevice.writeBlock(0, reinterpret_cast<char*>(&masterBlock));
 
-	//// Empty block initialization.
-	//// Have the empty blocks point to the next.
-	//for (unsigned i = 1; i < 250; ++i)
-	//{
-	//	char data[512];
-	//	unsigned nextEmptyBlock = i + 1;
-	//	if (i == 249) nextEmptyBlock = 0;
-	//	memcpy(data, &nextEmptyBlock, sizeof(unsigned));
-	//	mMemblockDevice.writeBlock(i, data);
-	//}
-
 	// Write the empty block indices.
 	unsigned char tempBuffer[512];
 	for (unsigned char i = 0; i < masterBlock.EmptyBlockCount; ++i)
