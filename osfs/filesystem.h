@@ -21,7 +21,7 @@ public:
 	void ls() const;
 	void ls(const std::string &path) const;  // optional
 	void create(const std::string &filePath);
-	//std::string cat(std::string &fileName) const;
+	void cat(const std::string &fileName) const;
 	//std::string createImage(const std::string &saveFile) const;
 	//std::string restoreImage(const std::string &saveFile) const;
 	void mkdir(std::string newName);

@@ -39,7 +39,9 @@ void FileSystem::format(void)
 	cd("/");
 	_cwd->AddSubdirectory("first");
 	_cwd->AddSubdirectory("second");
+	_cwd->AddSubdirectory("a");
 	create("a");
+	// TODO: Write data to a. Create an array containing a null terminator in the middle of it and write all that data to file. Then cat it (it should not stop at null terminator hopefully).
 	cd("first");
 	create("b");
 	create("c");
@@ -350,6 +352,58 @@ void FileSystem::_RemoveFile(unsigned char file)
 	mMemblockDevice.writeBlock(1, (char*)emptyFilesData);
 }
 
+void FileSystem::cat(const string& filePath) const
+{
+	int lastSlash = filePath.find_last_of("/");
+	string file = "";
+	Tree *directory = nullptr;
+
+	// Found no slash; filePath is the file relative to current directory.
+	if (lastSlash == -1)
+	{
+		file = filePath;
+		directory = _cwd;
+	}
+	// Found slash; file is part after last slash, directory is the part before.
+	else
+	{
+		file = filePath.substr(lastSlash + 1);
+		directory = const_cast<Tree*>(_DirectoryOf(filePath.substr(0, lastSlash)));
+	}
+
+	// We have the directory and filename. Get files in directory, search their
+	// respective blocks to find the one we want.
+	const vector<unsigned char>& files = directory->GetFiles();
+	for (unsigned char fileIndex : files)
+	{
+		Block f = mMemblockDevice.readBlock(fileIndex);
+		if (file == f.data())
+		{
+			FileBlock fb;
+			memcpy(&fb, f.data(), 512);
+
+			if (fb.FileSize == 0)
+				return;
+
+			for (unsigned i = 0, bytesRead = 0; bytesRead < fb.FileSize; ++i, bytesRead += 512)
+			{
+				unsigned remainingBytes = fb.FileSize - bytesRead;
+				if (remainingBytes > 512) remainingBytes = 512;
+
+				// Output remainingBytes worth of data
+				cout.write(mMemblockDevice.readBlock(fb.PayloadBlocks[i]).data(), remainingBytes);
+			}
+
+			cout << endl;
+
+			return;
+		}
+	}
+
+	// If we reached here, the file could not be found.
+	cout << "Could not find file " << filePath << endl;
+}
+
 // [KLART]
 // format
 // create <filnamn>
@@ -357,6 +411,7 @@ void FileSystem::_RemoveFile(unsigned char file)
 // mkdir <katalog>
 // cd <katalog>
 // hantera absoluta och relativa sökvägar
+// rm <filnamn> tar bort en given fil
 
 // [KVAR]
 // createImage <filnamn> (spara systemet på datorns hårddisk)
@@ -364,7 +419,6 @@ void FileSystem::_RemoveFile(unsigned char file)
 // cat <filnamn> skriv ut innehåll på skärm
 // copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
 // pwd
-// rm <filnamn> tar bort en given fil
 // append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
 // rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
 // katalognamn . och ..

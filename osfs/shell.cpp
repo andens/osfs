@@ -76,7 +76,7 @@ int main(void) {
 				fs.create(commandArr[1]);
                 break;
             case 4: // cat
-				
+				fs.cat(commandArr[1]);
                 break;
             case 5: // createImage
 
