@@ -107,7 +107,7 @@ void FileSystem::create(const std::string &filePath)
 {
 	//Kolla ifall filen redan finns
 	string file, dir;
-	Tree* tempTree = const_cast<Tree*>(_DirectoryOf(dir));
+	Tree* tempTree=NULL;
 	map<unsigned char, FileBlock> tempFileBlock;
 
 	if (strcmp(&filePath[filePath.length() - 1], "/") == 0)
@@ -128,14 +128,10 @@ void FileSystem::create(const std::string &filePath)
 	{
 		dir = filePath.substr(0, index);
 		file = filePath.substr(index + 1);
-
-		if (tempTree == NULL)
-		{
-			mkdir(dir);
-			tempTree = const_cast<Tree*>(_DirectoryOf(dir));
-		}
-
+		mkdir(dir);
+		tempTree = const_cast<Tree*>(_DirectoryOf(dir));
 		_GetFileBlocks(tempTree, tempFileBlock);
+
 	}
 
 	//Creating new FileBlock
