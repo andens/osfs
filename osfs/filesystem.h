@@ -46,7 +46,7 @@ private:
 		{
 			struct
 			{
-				unsigned FirstEmptyBlock;
+				unsigned EmptyBlockCount;
 			};
 			char x[512];
 		};
@@ -57,7 +57,7 @@ private:
 		char Name[16];
 		unsigned Access;
 		unsigned FileSize;
-		unsigned PayloadBlocks[122];
+		char PayloadBlocks[488];
 	};
 
 private:
