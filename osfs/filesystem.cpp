@@ -35,8 +35,8 @@ void FileSystem::format(void)
 	//}
 
 	// Write the empty block indices.
-	char tempBuffer[512];
-	for (char i = 0; i < masterBlock.EmptyBlockCount; ++i)
+	unsigned char tempBuffer[512];
+	for (unsigned char i = 0; i < masterBlock.EmptyBlockCount; ++i)
 	{
 		// All blocks except the first hard coded ones are empty.
 		tempBuffer[i] = i + numHardCodedBlocks;
@@ -45,7 +45,7 @@ void FileSystem::format(void)
 	// Zero rest of memory
 	memset(tempBuffer + masterBlock.EmptyBlockCount, 0, 512 - masterBlock.EmptyBlockCount);
 
-	mMemblockDevice.writeBlock(1, tempBuffer);
+	mMemblockDevice.writeBlock(1, (char*)tempBuffer);
 
 	cd("/");
 	_cwd->AddSubdirectory("first");
@@ -188,7 +188,7 @@ void FileSystem::create(const std::string &filePath)
 	//getting empty block
 	_temp = mMemblockDevice.readBlock(1);
 	//getting new pointer place
-	auto newBlock = _temp.data()[BlockSlott - 1];
+	unsigned char newBlock = _temp.data()[BlockSlott - 1];
 	//Create new block
 	mMemblockDevice.writeBlock(newBlock, (char*)&newFile);
 
