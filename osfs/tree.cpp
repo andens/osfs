@@ -11,7 +11,7 @@ void Tree::AddSubdirectory(string subDirectory)
 	}
 }
 
-void Tree::_Remove(function<void(int)> RemoveFile)
+void Tree::_Remove(function<void(unsigned char)> RemoveFile)
 {
 	for (auto i = _subDirectories.begin(); i != _subDirectories.end(); ++i)
 	{
@@ -25,21 +25,10 @@ void Tree::_Remove(function<void(int)> RemoveFile)
 		RemoveFile(_files[i]);
 	}
 
+	_files.clear();
 }
 
-void Tree::RemoveFile(int file)
-{
-	for (int i = 0;i < _files.size();i++)
-	{
-		if (file == _files[i])
-		{
-			_files.erase(_files.begin()+i);
-			break;
-		}
-	}
-}
-
-void Tree::RemoveSubdirectory(string subDirectory, function<void(int)> RemoveFile)
+void Tree::RemoveSubdirectory(string subDirectory, function<void(unsigned char)> RemoveFile)
 {
 	if (_subDirectories.find(subDirectory) == _subDirectories.end())
 		return;
@@ -58,12 +47,12 @@ const Tree* Tree::GetDirectory(string subDirectory) const
 	return &it->second;
 }
 
-void Tree::AddFile(int file)
+void Tree::AddFile(unsigned char file)
 {
 	_files.push_back(file);
 }
 
-const vector<int>& Tree::GetFiles(void) const
+const vector<unsigned char>& Tree::GetFiles(void) const
 {
 	return _files;
 }
@@ -82,5 +71,5 @@ std::string Tree::operator-(const Tree& rhs)
 	if (rhs._path.length() > _path.length())
 		return "";
 
-	return _path.substr(rhs._path.length());
+	return _path.substr(rhs._path.length() + 1);
 }
