@@ -153,31 +153,35 @@ void FileSystem::create(const std::string &filePath)
 	strncpy_s(newFile.Name,file.c_str(),file.size());
 	newFile.Access = 0;
 	newFile.FileSize = 0;
-	for (int i = 0;i < 122;i++)
+	for (int i = 0;i < 488;i++)
 	{
 		newFile.PayloadBlocks[i] = 0;
 	}
 
 	//step two leta reda på ledig plats
-	Block temp;
-	//fetching master block
+	Block temp,_temp;
+
+
+	//Getting master block
 	temp = mMemblockDevice.readBlock(0);
-
 	MasterBlock masterTemp;
-	//creating a masterBlock
 	memcpy(&masterTemp, temp.data(), 512);
-	unsigned BlockSlott = masterTemp.FirstEmptyBlock;
-	//fetching second Empty block
-	Block _temp = mMemblockDevice.readBlock(masterTemp.FirstEmptyBlock);
-	// Copy next empty block pointer
-	memcpy(&masterTemp.FirstEmptyBlock, _temp.data(), 4); 
+
+	//getting emptyy block pointer block
+	unsigned BlockSlott = masterTemp.EmptyBlockCount;
+	//getting empty block
+	_temp = mMemblockDevice.readBlock(1);
+	//getting new pointer place
+	auto newBlock = _temp.data()[BlockSlott - 1];
+	//Create new block
+	mMemblockDevice.writeBlock(newBlock, (char*)&newFile);
+
+	//Decrese emptyblockCount 
+	masterTemp.EmptyBlockCount--;
+	//Write the new EmptyBlockCount back to masterBlock
 	mMemblockDevice.writeBlock(0, (char*)&masterTemp);
-	//step tre skriva till sagda plats
-	mMemblockDevice.writeBlock(BlockSlott, (char*)&newFile);
-
 	//lägg till fil i directory
-	tempTree->AddFile(BlockSlott);
-
+	tempTree->AddFile(newBlock);
 }
 
 void FileSystem::mkdir(std::string newName)
