@@ -20,6 +20,7 @@ public:
 	std::vector<std::string> GetSubdirectories(void) const;
 	std::string GetPath(void) const { return _path; }
 	Tree* Parent(void) { return _parent; }
+	void RemoveFile(unsigned char file);
 
 	std::string operator-(const Tree& rhs);
 

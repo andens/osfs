@@ -11,6 +11,18 @@ void Tree::AddSubdirectory(string subDirectory)
 	}
 }
 
+void Tree::RemoveFile(unsigned char file)
+{
+	for (unsigned i = 0; i < _files.size(); ++i)
+	{
+		if (_files[i] == file)
+		{
+			_files.erase(_files.begin() + i);
+			return;
+		}
+	}
+}
+
 void Tree::_Remove(function<void(unsigned char)> RemoveFile)
 {
 	for (auto i = _subDirectories.begin(); i != _subDirectories.end(); ++i)

@@ -85,7 +85,7 @@ int main(void) {
 
                 break;
             case 7: // rm
-
+				fs.rm(commandArr[1]);
                 break;
 
             case 8: // copy

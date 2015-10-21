@@ -218,14 +218,41 @@ void FileSystem::rmdir(string directory)
 	}
 }
 
-void FileSystem::rm(const std::string &filePath)
+void FileSystem::rm(const string &filePath)
 {
-	const vector<unsigned char>& files = _cwd->GetFiles();
+	int lastSlash = filePath.find_last_of("/");
+	string file = "";
+	Tree *directory = nullptr;
 
-	for (int i = 0;i < files.size();i++)
+	// Found no slash; filePath is the file relative to current directory.
+	if (lastSlash == -1)
 	{
-
+		file = filePath;
+		directory = _cwd;
 	}
+	// Found slash; file is part after last slash, directory is the part before.
+	else
+	{
+		file = filePath.substr(lastSlash + 1);
+		directory = const_cast<Tree*>(_DirectoryOf(filePath.substr(0, lastSlash)));
+	}
+
+	// We have the directory and filename. Get files in directory, search their
+	// respective blocks to find the one we want and remove it.
+	const vector<unsigned char>& files = directory->GetFiles();
+	for (unsigned char fileIndex : files)
+	{
+		Block f = mMemblockDevice.readBlock(fileIndex);
+		if (file == f.data())
+		{
+			_RemoveFile(fileIndex);
+			directory->RemoveFile(fileIndex);
+			return;
+		}
+	}
+
+	// If we reached here, the file could not be found.
+	cout << "Could not find file " << filePath << endl;
 }
 
 void FileSystem::cd(const string& directory)
