@@ -15,21 +15,37 @@ void FileSystem::format(void)
 {
 	mMemblockDevice.reset();
 
+	// Master and index of empty blocks.
+	const unsigned numHardCodedBlocks = 2;
+
 	// Create the master block
 	MasterBlock masterBlock;
-	masterBlock.FirstEmptyBlock = 1;
+	masterBlock.EmptyBlockCount = 250 - numHardCodedBlocks;
 	mMemblockDevice.writeBlock(0, reinterpret_cast<char*>(&masterBlock));
 
-	// Empty block initialization.
-	// Have the empty blocks point to the next.
-	for (unsigned i = 1; i < 250; ++i)
+	//// Empty block initialization.
+	//// Have the empty blocks point to the next.
+	//for (unsigned i = 1; i < 250; ++i)
+	//{
+	//	char data[512];
+	//	unsigned nextEmptyBlock = i + 1;
+	//	if (i == 249) nextEmptyBlock = 0;
+	//	memcpy(data, &nextEmptyBlock, sizeof(unsigned));
+	//	mMemblockDevice.writeBlock(i, data);
+	//}
+
+	// Write the empty block indices.
+	unsigned char tempBuffer[512];
+	for (unsigned char i = 0; i < masterBlock.EmptyBlockCount; ++i)
 	{
-		char data[512];
-		unsigned nextEmptyBlock = i + 1;
-		if (i == 249) nextEmptyBlock = 0;
-		memcpy(data, &nextEmptyBlock, sizeof(unsigned));
-		mMemblockDevice.writeBlock(i, data);
+		// All blocks except the first hard coded ones are empty.
+		tempBuffer[i] = i + numHardCodedBlocks;
 	}
+
+	// Zero rest of memory
+	memset(tempBuffer + masterBlock.EmptyBlockCount, 0, 512 - masterBlock.EmptyBlockCount);
+
+	mMemblockDevice.writeBlock(1, (char*)tempBuffer);
 
 	cd("/");
 	_cwd->AddSubdirectory("first");
@@ -168,7 +184,7 @@ void FileSystem::create(const std::string &filePath)
 	//getting empty block
 	_temp = mMemblockDevice.readBlock(1);
 	//getting new pointer place
-	auto newBlock = _temp.data()[BlockSlott - 1];
+	unsigned char newBlock = _temp.data()[BlockSlott - 1];
 	//Create new block
 	mMemblockDevice.writeBlock(newBlock, (char*)&newFile);
 
@@ -288,52 +304,52 @@ const Tree* FileSystem::_DirectoryOf(const string& path) const
 // TODO: Don't forget to remove payloads!
 void FileSystem::_RemoveFile(int file)
 {
-	MasterBlock mb;
-	Block b = mMemblockDevice.readBlock(0);
-	memcpy(&mb, b.data(), 512);
+	//MasterBlock mb;
+	//Block b = mMemblockDevice.readBlock(0);
+	//memcpy(&mb, b.data(), 512);
 
-	unsigned firstEmptyBeforeFile = 0;
-	unsigned walker = mb.FirstEmptyBlock;
-	
-	while (walker < file && walker > 0)
-	{
-		firstEmptyBeforeFile = walker;
+	//unsigned firstEmptyBeforeFile = 0;
+	//unsigned walker = mb.FirstEmptyBlock;
+	//
+	//while (walker < file && walker > 0)
+	//{
+	//	firstEmptyBeforeFile = walker;
 
-		// Go to next empty block. Just copy the next block pointer
-		// into the walker variable.
-		b = mMemblockDevice.readBlock(walker);
-		memcpy(&walker, b.data(), 4);
-	}
+	//	// Go to next empty block. Just copy the next block pointer
+	//	// into the walker variable.
+	//	b = mMemblockDevice.readBlock(walker);
+	//	memcpy(&walker, b.data(), 4);
+	//}
 
-	// The file block
-	b = mMemblockDevice.readBlock(file);
+	//// The file block
+	//b = mMemblockDevice.readBlock(file);
 
-	// No empty block before file
-	if (firstEmptyBeforeFile == 0)
-	{
-		// Since we didn't find a first empty block before the file, mb.FirstEmptyBlock
-		// is the next empty block after the file. The file we are removing should
-		// therefore point to that one.
-		char tempBuffer[512];
-		memcpy(tempBuffer, &mb.FirstEmptyBlock, 4);
-		mMemblockDevice.writeBlock(file, tempBuffer);
+	//// No empty block before file
+	//if (firstEmptyBeforeFile == 0)
+	//{
+	//	// Since we didn't find a first empty block before the file, mb.FirstEmptyBlock
+	//	// is the next empty block after the file. The file we are removing should
+	//	// therefore point to that one.
+	//	char tempBuffer[512];
+	//	memcpy(tempBuffer, &mb.FirstEmptyBlock, 4);
+	//	mMemblockDevice.writeBlock(file, tempBuffer);
 
-		// The file block we are removing will be new first empty block.
-		mb.FirstEmptyBlock = file;
-		mMemblockDevice.writeBlock(0, (char*)&mb);
-	}
-	// Found first empty block before file from walking
-	else
-	{
-		// Link empty block before to file
-		char tempBuffer[512];
-		memcpy(tempBuffer, &file, 4);
-		mMemblockDevice.writeBlock(firstEmptyBeforeFile, tempBuffer);
+	//	// The file block we are removing will be new first empty block.
+	//	mb.FirstEmptyBlock = file;
+	//	mMemblockDevice.writeBlock(0, (char*)&mb);
+	//}
+	//// Found first empty block before file from walking
+	//else
+	//{
+	//	// Link empty block before to file
+	//	char tempBuffer[512];
+	//	memcpy(tempBuffer, &file, 4);
+	//	mMemblockDevice.writeBlock(firstEmptyBeforeFile, tempBuffer);
 
-		// Link file to walker (walker is now the first empty after)
-		memcpy(tempBuffer, &walker, 4);
-		mMemblockDevice.writeBlock(file, tempBuffer);
-	}
+	//	// Link file to walker (walker is now the first empty after)
+	//	memcpy(tempBuffer, &walker, 4);
+	//	mMemblockDevice.writeBlock(file, tempBuffer);
+	//}
 }
 
 // [KLART]
