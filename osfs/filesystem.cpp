@@ -41,7 +41,6 @@ void FileSystem::format(void)
 	_cwd->AddSubdirectory("second");
 	_cwd->AddSubdirectory("a");
 	create("a");
-	// TODO: Write data to a. Create an array containing a null terminator in the middle of it and write all that data to file. Then cat it (it should not stop at null terminator hopefully).
 	cd("first");
 	create("b");
 	create("c");
