@@ -97,7 +97,7 @@ int main(void) {
                 break;
 
             case 10: // rename
-
+				fs.rename( commandArr[1], commandArr[2] );
                 break;
 
             case 11: // mkdir

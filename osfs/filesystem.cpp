@@ -380,6 +380,50 @@ void FileSystem::cat(const string& filePath) const
 	cout << "Could not find file " << filePath << endl;
 }
 
+void FileSystem::rename( const string& src, const string& dst )
+{
+	if ( dst.length() > 15 )
+	{
+		cout << "Destination file name too long" << endl;
+		return;
+	}
+
+	auto& files = _cwd->GetFiles();
+
+	// First check that the new file does not already exist.
+	for ( unsigned char fileIndex : files )
+	{
+		FileBlock fb;
+		memcpy( &fb, mMemblockDevice.readBlock( fileIndex ).data(), 512 );
+
+		if ( dst == fb.Name )
+		{
+			cout << "Destination file already exists" << endl;
+			return;
+		}
+	}
+
+	// We are free to rename. Try to find the file, and if found rename it.
+	for ( unsigned char fileIndex : files )
+	{
+		FileBlock fb;
+		memcpy( &fb, mMemblockDevice.readBlock( fileIndex ).data(), 512 );
+
+		// Found it! Time to rename.
+		if ( src == fb.Name )
+		{
+			strcpy_s( fb.Name, dst.c_str() );
+			mMemblockDevice.writeBlock( fileIndex, (char*)&fb );
+
+			return;
+		}
+	}
+
+	// If we reached here it means we never returned in the previous loop,
+	// and so the source file was not found.
+	cout << "Source file not found" << endl;
+}
+
 void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& file ) const
 {
 	int lastSlash = filePath.find_last_of( "/" );
@@ -407,6 +451,7 @@ void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& fil
 // hantera absoluta och relativa sökvägar
 // rm <filnamn> tar bort en given fil
 // pwd
+// rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
 
 // [KVAR]
 // createImage <filnamn> (spara systemet på datorns hårddisk)
@@ -414,7 +459,6 @@ void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& fil
 // cat <filnamn> skriv ut innehåll på skärm
 // copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
 // append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
-// rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
 // katalognamn . och ..
 // chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
 // cat med access
