@@ -109,7 +109,7 @@ int main(void) {
                 break;
 
             case 13: // pwd
-
+				cout << fs.GetCWD() << endl;
                 break;
 
             case 14: // help
