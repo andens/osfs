@@ -33,7 +33,6 @@ public:
 
 	/* Optional */
 	//std::string append(const std::string &source, const std::string &app);
-	//std::string rename(const std::string &source, const std::string &newName);
 	//std::string chmod(int permission, const std::string &file);
 
 	/* Add your own member-functions if needed */

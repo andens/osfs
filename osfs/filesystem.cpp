@@ -451,11 +451,11 @@ void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& fil
 // rm <filnamn> tar bort en given fil
 // pwd
 // rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
+// cat <filnamn> skriv ut innehåll på skärm
 
 // [KVAR]
 // createImage <filnamn> (spara systemet på datorns hårddisk)
 // restoreImage <filnamn>
-// cat <filnamn> skriv ut innehåll på skärm
 // copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
 // append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
 // katalognamn . och ..
