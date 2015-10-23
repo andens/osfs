@@ -66,6 +66,7 @@ private:
 	void _ListDirectory(const Tree *directory) const;
 	const Tree* _DirectoryOf(const std::string& path) const;
 	void _RemoveFile(unsigned char file);
+	void _SplitFilePath( const std::string& filePath, Tree **dir, std::string& file ) const;
 
 private:
     MemBlockDevice mMemblockDevice;

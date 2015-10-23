@@ -227,22 +227,10 @@ void FileSystem::rmdir(string directory)
 
 void FileSystem::rm(const string &filePath)
 {
-	int lastSlash = filePath.find_last_of("/");
 	string file = "";
 	Tree *directory = nullptr;
 
-	// Found no slash; filePath is the file relative to current directory.
-	if (lastSlash == -1)
-	{
-		file = filePath;
-		directory = _cwd;
-	}
-	// Found slash; file is part after last slash, directory is the part before.
-	else
-	{
-		file = filePath.substr(lastSlash + 1);
-		directory = const_cast<Tree*>(_DirectoryOf(filePath.substr(0, lastSlash)));
-	}
+	_SplitFilePath( filePath, &directory, file );
 
 	// We have the directory and filename. Get files in directory, search their
 	// respective blocks to find the one we want and remove it.
@@ -354,22 +342,10 @@ void FileSystem::_RemoveFile(unsigned char file)
 
 void FileSystem::cat(const string& filePath) const
 {
-	int lastSlash = filePath.find_last_of("/");
 	string file = "";
 	Tree *directory = nullptr;
 
-	// Found no slash; filePath is the file relative to current directory.
-	if (lastSlash == -1)
-	{
-		file = filePath;
-		directory = _cwd;
-	}
-	// Found slash; file is part after last slash, directory is the part before.
-	else
-	{
-		file = filePath.substr(lastSlash + 1);
-		directory = const_cast<Tree*>(_DirectoryOf(filePath.substr(0, lastSlash)));
-	}
+	_SplitFilePath( filePath, &directory, file );
 
 	// We have the directory and filename. Get files in directory, search their
 	// respective blocks to find the one we want.
@@ -404,6 +380,24 @@ void FileSystem::cat(const string& filePath) const
 	cout << "Could not find file " << filePath << endl;
 }
 
+void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& file ) const
+{
+	int lastSlash = filePath.find_last_of( "/" );
+
+	// Found no slash; filePath is the file relative to current directory.
+	if ( lastSlash == -1 )
+	{
+		file = filePath;
+		*dir = _cwd;
+	}
+	// Found slash; file is part after last slash, directory is the part before.
+	else
+	{
+		file = filePath.substr( lastSlash + 1 );
+		*dir = const_cast<Tree*>(_DirectoryOf( filePath.substr( 0, lastSlash ) ));
+	}
+}
+
 // [KLART]
 // format
 // create <filnamn>
@@ -412,13 +406,13 @@ void FileSystem::cat(const string& filePath) const
 // cd <katalog>
 // hantera absoluta och relativa sökvägar
 // rm <filnamn> tar bort en given fil
+// pwd
 
 // [KVAR]
 // createImage <filnamn> (spara systemet på datorns hårddisk)
 // restoreImage <filnamn>
 // cat <filnamn> skriv ut innehåll på skärm
 // copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
-// pwd
 // append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
 // rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
 // katalognamn . och ..
