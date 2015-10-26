@@ -572,7 +572,36 @@ void FileSystem::_WriteToFile( const string& filePath, char *data, unsigned data
 	// Reached here: file found
 	MasterBlock mb;
 	memcpy( &mb, mMemblockDevice.readBlock( 0 ).data(), 512 );
-	Block emptyBlockPointers = mMemblockDevice.readBlock( 1 );
+	unsigned char emptyBlockPointers[512];
+	memcpy( emptyBlockPointers, mMemblockDevice.readBlock( 1 ).data(), 512 );
+
+	unsigned payloadCount = (fb.FileSize + 511) / 512;
+	unsigned payloadCountRequired = (dataSize + 511) / 512;
+
+	// File has too few payloads, allocate the remaining ones.
+	if ( payloadCount < payloadCountRequired )
+	{
+		unsigned diff = payloadCountRequired - payloadCount;
+		for ( unsigned i = 0; i < diff; ++i )
+		{
+			fb.PayloadBlocks[payloadCount + i] = emptyBlockPointers[mb.EmptyBlockCount - 1 - i];
+		}
+		mb.EmptyBlockCount -= diff;
+		mMemblockDevice.writeBlock( 0, (char*)&mb );
+	}
+	// File has too many payloads. Free up the ones not needed.
+	else if ( payloadCount > payloadCountRequired )
+	{
+		unsigned diff = payloadCount - payloadCountRequired;
+		for ( unsigned i = 0; i < diff; ++i )
+		{
+			emptyBlockPointers[mb.EmptyBlockCount + i] = fb.PayloadBlocks[payloadCountRequired + i];
+			fb.PayloadBlocks[payloadCountRequired + i] = 0;
+		}
+		mb.EmptyBlockCount += diff;
+		mMemblockDevice.writeBlock( 0, (char*)&mb );
+		mMemblockDevice.writeBlock( 1, (char*)emptyBlockPointers );
+	}
 
 	unsigned bytesWritten = 0;
 	unsigned payloadIndex = 0;
@@ -585,16 +614,11 @@ void FileSystem::_WriteToFile( const string& filePath, char *data, unsigned data
 		vector<char> tempData( 512 );
 		memcpy( tempData.data(), data + bytesWritten, bytesToWrite );
 
-		// Create a new payload block
-		fb.PayloadBlocks[payloadIndex] = emptyBlockPointers[mb.EmptyBlockCount - 1 - payloadIndex];
 		mMemblockDevice.writeBlock( fb.PayloadBlocks[payloadIndex], tempData );
 
 		payloadIndex++;
 		bytesWritten += bytesToWrite;
 	}
-
-	mb.EmptyBlockCount -= payloadIndex;
-	mMemblockDevice.writeBlock( 0, (char*)&mb );
 
 	fb.FileSize = dataSize;
 	mMemblockDevice.writeBlock( fileBlockIndex, (char*)&fb );
