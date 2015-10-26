@@ -216,6 +216,21 @@ void FileSystem::rmdir(string directory)
 {
 	Tree *d = const_cast<Tree*>(_DirectoryOf(directory));
 	Tree *p = d ? d->Parent() : nullptr;
+
+	// Check if we are currently in the directory that is to be removed or
+	// one of its subdirectories. In that case we switch to its parent.
+	Tree *testWalker = _cwd;
+	while ( testWalker )
+	{
+		if ( testWalker == d )
+		{
+			cd( p->GetPath() );
+			break;
+		}
+
+		testWalker = testWalker->Parent();
+	}
+
 	if (p)
 	{
 		string remove = *d - *p;
