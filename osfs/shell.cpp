@@ -89,7 +89,7 @@ int main(void) {
                 break;
 
             case 8: // copy
-
+				fs.copy( commandArr[1], commandArr[2] );
                 break;
 
             case 9: // append

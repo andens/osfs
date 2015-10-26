@@ -45,6 +45,16 @@ void FileSystem::format(void)
 	create("b");
 	create("c");
 	cd("/");
+
+	// Garbage data to test copy
+	char data[513];
+	for ( unsigned i = 0; i < 256; ++i )
+	{
+		data[i] = (char)i;
+		data[i + 256u] = (char)i;
+	}
+	data[512] = 'a';
+	_WriteToFile( "/first/b", data, 513 );
 }
 
 vector<string> FileSystem::_Split(const string &filePath, const char delim) const {
@@ -132,7 +142,7 @@ void FileSystem::create(const std::string &filePath)
 	}
 	else
 	{
-		dir = filePath.substr(0, index);
+		dir = filePath.substr(0, index + 1);
 		file = filePath.substr(index + 1);
 		mkdir(dir);
 		tempTree = const_cast<Tree*>(_DirectoryOf(dir));
@@ -231,6 +241,9 @@ void FileSystem::rm(const string &filePath)
 	Tree *directory = nullptr;
 
 	_SplitFilePath( filePath, &directory, dir, file );
+
+	if ( !directory )
+		return;
 
 	// We have the directory and filename. Get files in directory, search their
 	// respective blocks to find the one we want and remove it.
@@ -430,7 +443,79 @@ void FileSystem::rename( const string& src, const string& dst )
 
 void FileSystem::copy( const string &src, const string &dst )
 {
+	string srcFile = "";
+	string srcDir = "";
+	Tree *srcDirectory = nullptr;
+	_SplitFilePath( src, &srcDirectory, srcDir, srcFile );
 
+	if ( !srcDirectory )
+		return;
+
+	// Check if the file we want to copy actually exists
+	FileBlock srcFileBlock;
+	bool foundFile = false;
+	auto& files = srcDirectory->GetFiles();
+	for ( unsigned char file : files )
+	{
+		memcpy( &srcFileBlock, mMemblockDevice.readBlock( file ).data(), 512 );
+		if ( srcFile == srcFileBlock.Name )
+		{
+			foundFile = true;
+			break;
+		}
+	}
+
+	if ( !foundFile )
+	{
+		cout << "Could not find file '" << srcFile << "' in directory '" << srcDir << "'." << endl;
+		return;
+	}
+
+	string dstFile = "";
+	string dstDir = "";
+	Tree *dstDirectory = nullptr;
+	_SplitFilePath( dst, &dstDirectory, dstDir, dstFile );
+
+	if ( !dstDirectory )
+	{
+		cout << "Creating directory " << dstDir << endl;
+		mkdir( dstDir );
+		dstDirectory = const_cast<Tree*>(_DirectoryOf( dstDir ));
+	}
+
+	// Make sure that the destination file does not already exist.
+	auto& dstFiles = dstDirectory->GetFiles();
+	for ( unsigned char file : dstFiles )
+	{
+		if ( dstFile == mMemblockDevice.readBlock( file ).data() )
+		{
+			cout << "Destination file already exists" << endl;
+			return;
+		}
+	}
+
+	// If we reached here, srcFileBlock is a valid source file to be copied,
+	// and the destination file is free to be created.
+	create( dst );
+	char *data = new char[srcFileBlock.FileSize];
+	unsigned bytesRead = 0;
+	unsigned payloadCount = 0;
+	while ( bytesRead < srcFileBlock.FileSize )
+	{
+		int payloadBlockIndex = srcFileBlock.PayloadBlocks[payloadCount];
+		unsigned bytesToRead = srcFileBlock.FileSize - bytesRead;
+		if ( bytesToRead > 512 )
+			bytesToRead = 512;
+
+		memcpy( data + bytesRead, mMemblockDevice.readBlock( payloadBlockIndex ).data(), bytesToRead );
+
+		payloadCount++;
+		bytesRead += bytesToRead;
+	}
+
+	_WriteToFile( dst, data, srcFileBlock.FileSize );
+
+	delete[] data;
 }
 
 void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& dirString, string& file ) const
@@ -448,9 +533,71 @@ void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& dir
 	else
 	{
 		file = filePath.substr( lastSlash + 1 );
-		dirString = filePath.substr( 0, lastSlash );
+		dirString = filePath.substr( 0, lastSlash + 1 );
 		*dir = const_cast<Tree*>(_DirectoryOf( dirString ));
 	}
+}
+
+void FileSystem::_WriteToFile( const string& filePath, char *data, unsigned dataSize )
+{
+	string file = "";
+	string dirString = "";
+	Tree *dir = nullptr;
+	_SplitFilePath( filePath, &dir, dirString, file );
+
+	if ( !dir )
+		return;
+
+	// Find file
+	FileBlock fb;
+	unsigned char fileBlockIndex = 0;
+	auto& files = dir->GetFiles();
+	for ( unsigned char f : files )
+	{
+		memcpy( &fb, mMemblockDevice.readBlock( f ).data(), 512 );
+
+		if ( file == fb.Name )
+		{
+			fileBlockIndex = f;
+			break;
+		}
+	}
+
+	if ( !fileBlockIndex )
+	{
+		cout << "Could not find '" << filePath << "'" << endl;
+		return;
+	}
+
+	// Reached here: file found
+	MasterBlock mb;
+	memcpy( &mb, mMemblockDevice.readBlock( 0 ).data(), 512 );
+	Block emptyBlockPointers = mMemblockDevice.readBlock( 1 );
+
+	unsigned bytesWritten = 0;
+	unsigned payloadIndex = 0;
+	while ( bytesWritten < dataSize )
+	{
+		unsigned bytesToWrite = dataSize - bytesWritten;
+		if ( bytesToWrite > 512 )
+			bytesToWrite = 512;
+
+		vector<char> tempData( 512 );
+		memcpy( tempData.data(), data + bytesWritten, bytesToWrite );
+
+		// Create a new payload block
+		fb.PayloadBlocks[payloadIndex] = emptyBlockPointers[mb.EmptyBlockCount - 1 - payloadIndex];
+		mMemblockDevice.writeBlock( fb.PayloadBlocks[payloadIndex], tempData );
+
+		payloadIndex++;
+		bytesWritten += bytesToWrite;
+	}
+
+	mb.EmptyBlockCount -= payloadIndex;
+	mMemblockDevice.writeBlock( 0, (char*)&mb );
+
+	fb.FileSize = dataSize;
+	mMemblockDevice.writeBlock( fileBlockIndex, (char*)&fb );
 }
 
 // [KLART]
@@ -464,11 +611,11 @@ void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& dir
 // pwd
 // rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
 // cat <filnamn> skriv ut innehåll på skärm
+// copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
 
 // [KVAR]
 // createImage <filnamn> (spara systemet på datorns hårddisk)
 // restoreImage <filnamn>
-// copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
 // append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
 // katalognamn . och ..
 // chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
