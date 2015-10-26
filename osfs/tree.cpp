@@ -86,5 +86,5 @@ std::string Tree::operator-(const Tree& rhs)
 	if (rhs._path.length() > _path.length())
 		return "";
 
-	return _path.substr(rhs._path.length() + 1);
+	return _path.substr(rhs._path.length());
 }
