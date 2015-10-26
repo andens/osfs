@@ -2,6 +2,7 @@
 #include <sstream>
 #include "filesystem.h"
 #include <Windows.h>
+#include <crtdbg.h>
 
 using namespace std;
 
@@ -23,6 +24,7 @@ std::vector<string> split(const string &filePath, const char delim = '/');
 string help();
 
 int main(void) {
+	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
     FileSystem fs;
 
