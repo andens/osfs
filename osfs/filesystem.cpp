@@ -227,9 +227,10 @@ void FileSystem::rmdir(string directory)
 void FileSystem::rm(const string &filePath)
 {
 	string file = "";
+	string dir = "";
 	Tree *directory = nullptr;
 
-	_SplitFilePath( filePath, &directory, file );
+	_SplitFilePath( filePath, &directory, dir, file );
 
 	// We have the directory and filename. Get files in directory, search their
 	// respective blocks to find the one we want and remove it.
@@ -342,9 +343,13 @@ void FileSystem::_RemoveFile(unsigned char file)
 void FileSystem::cat(const string& filePath) const
 {
 	string file = "";
+	string dir = "";
 	Tree *directory = nullptr;
 
-	_SplitFilePath( filePath, &directory, file );
+	_SplitFilePath( filePath, &directory, dir, file );
+
+	if ( !directory )
+		return;
 
 	// We have the directory and filename. Get files in directory, search their
 	// respective blocks to find the one we want.
@@ -423,7 +428,12 @@ void FileSystem::rename( const string& src, const string& dst )
 	cout << "Source file not found" << endl;
 }
 
-void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& file ) const
+void FileSystem::copy( const string &src, const string &dst )
+{
+
+}
+
+void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& dirString, string& file ) const
 {
 	int lastSlash = filePath.find_last_of( "/" );
 
@@ -431,13 +441,15 @@ void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& fil
 	if ( lastSlash == -1 )
 	{
 		file = filePath;
+		dirString = _cwd->GetPath();
 		*dir = _cwd;
 	}
 	// Found slash; file is part after last slash, directory is the part before.
 	else
 	{
 		file = filePath.substr( lastSlash + 1 );
-		*dir = const_cast<Tree*>(_DirectoryOf( filePath.substr( 0, lastSlash ) ));
+		dirString = filePath.substr( 0, lastSlash );
+		*dir = const_cast<Tree*>(_DirectoryOf( dirString ));
 	}
 }
 

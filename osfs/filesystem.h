@@ -28,7 +28,7 @@ public:
 	void mkdir(std::string newName);
 	void rmdir(std::string directory);
 	void rm(const std::string &filePath);
-	//std::string copy(const std::string &source, const std::string &dest);
+	void copy(const std::string &src, const std::string &dst);
 	void cd(const std::string& directory);
 
 	/* Optional */
@@ -66,7 +66,7 @@ private:
 	void _ListDirectory(const Tree *directory) const;
 	const Tree* _DirectoryOf(const std::string& path) const;
 	void _RemoveFile(unsigned char file);
-	void _SplitFilePath( const std::string& filePath, Tree **dir, std::string& file ) const;
+	void _SplitFilePath( const std::string& filePath, Tree **dir, std::string& dirString, std::string& file ) const;
 
 private:
     MemBlockDevice mMemblockDevice;
