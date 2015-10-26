@@ -86,5 +86,8 @@ std::string Tree::operator-(const Tree& rhs)
 	if (rhs._path.length() > _path.length())
 		return "";
 
-	return _path.substr(rhs._path.length());
+	if ( rhs._path.length() == 1 ) // root
+		return _path.substr( rhs._path.length() ); // root does not have a separator (its name is '/')
+	else
+		return _path.substr( rhs._path.length() + 1 );
 }

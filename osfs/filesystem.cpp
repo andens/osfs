@@ -76,7 +76,9 @@ void FileSystem::ls(void) const
 
 void FileSystem::ls(const string &path) const
 {
-	_ListDirectory(_DirectoryOf(path));
+	const Tree *dir = _DirectoryOf( path );
+	if ( dir )
+		_ListDirectory( dir );
 }
 
 void FileSystem::_ListDirectory(const Tree *directory) const
