@@ -13,10 +13,6 @@ string availableCommands[NUMAVAILABLECOMMANDS] = {
     "rm","copy","append","rename","mkdir","cd","pwd","help", "rmdir"
 };
 
-// Sets up with the filesystem with some default data so that we have something
-// to work with.
-void setupFilesystemData(FileSystem& fs);
-
 /* Takes usercommand from input and returns number of commands, commands are stored in strArr[] */
 int parseCommandString(const string &userCommand, string strArr[]);
 int findCommand(string &command);
@@ -29,7 +25,6 @@ string help();
 int main(void) {
 
     FileSystem fs;
-    setupFilesystemData(fs);
 
     string userCommand, commandArr[MAXCOMMANDS];
     string user = "user@DV1492";    // Change this if you want another user to be displayed
@@ -64,7 +59,7 @@ int main(void) {
                 cout << "Exiting\n";
                 break;
             case 1: // format
-                // Call fileSystem.format()
+				fs.format();
                 break;
             case 2: // ls
 				if (commandArr[1] == "")
@@ -79,10 +74,10 @@ int main(void) {
 				fs.cat(commandArr[1]);
                 break;
             case 5: // createImage
-
+				fs.createImage( commandArr[1] );
                 break;
             case 6: // restoreImage
-
+				fs.restoreImage( commandArr[1] );
                 break;
             case 7: // rm
 				fs.rm(commandArr[1]);
@@ -193,9 +188,4 @@ string help() {
     helpStr += "* pwd:                              Get current working directory\n";
     helpStr += "* help:                             Prints this help screen\n";
     return helpStr;
-}
-
-void setupFilesystemData(FileSystem& fs)
-{
-    
 }

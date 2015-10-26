@@ -23,8 +23,8 @@ public:
 	void create(const std::string &filePath);
 	void cat(const std::string &fileName) const;
 	void rename( const std::string& src, const std::string& dst );
-	//std::string createImage(const std::string &saveFile) const;
-	//std::string restoreImage(const std::string &saveFile) const;
+	void createImage(const std::string &saveFile) const;
+	void restoreImage(const std::string &saveFile);
 	void mkdir(std::string newName);
 	void rmdir(std::string directory);
 	void rm(const std::string &filePath);
@@ -67,7 +67,7 @@ private:
 	const Tree* _DirectoryOf(const std::string& path) const;
 	void _RemoveFile(unsigned char file);
 	void _SplitFilePath( const std::string& filePath, Tree **dir, std::string& dirString, std::string& file ) const;
-	void _WriteToFile( const std::string& filePath, char *data, unsigned dataSize );
+	void _WriteToFile( const std::string& filePath, const char *data, unsigned dataSize );
 
 private:
     MemBlockDevice mMemblockDevice;

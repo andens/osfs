@@ -12,7 +12,7 @@ class Tree
 public:
 	Tree() : _path("/") {};
 	Tree(std::string path, Tree *parent) : _path(path), _parent(parent) {};
-	void AddSubdirectory(std::string subDirectory);
+	Tree* AddSubdirectory(std::string subDirectory);
 	void RemoveSubdirectory(std::string subDirectory, std::function<void(unsigned char)> RemoveFile);
 	void AddFile(unsigned char file);
 	const Tree* GetDirectory(std::string subDirectory) const;

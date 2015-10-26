@@ -1,19 +1,22 @@
 #include "filesystem.h"
 
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include <algorithm>
 #include <Windows.h>
 
 using namespace std;
 
-FileSystem::FileSystem() : _cwd(&_root) {
-	format();
+FileSystem::FileSystem() : _cwd(&_root)
+{
+	
 }
 
 void FileSystem::format(void)
 {
 	mMemblockDevice.reset();
+	_root = Tree();
 
 	// Master and index of empty blocks.
 	const unsigned numHardCodedBlocks = 2;
@@ -36,25 +39,7 @@ void FileSystem::format(void)
 
 	mMemblockDevice.writeBlock(1, (char*)tempBuffer);
 
-	cd("/");
-	_cwd->AddSubdirectory("first");
-	_cwd->AddSubdirectory("second");
-	_cwd->AddSubdirectory("a");
-	create("a");
-	cd("first");
-	create("b");
-	create("c");
-	cd("/");
-
-	// Garbage data to test copy
-	char data[513];
-	for ( unsigned i = 0; i < 256; ++i )
-	{
-		data[i] = (char)i;
-		data[i + 256u] = (char)i;
-	}
-	data[512] = 'a';
-	_WriteToFile( "/first/b", data, 513 );
+	cd( "/" );
 }
 
 vector<string> FileSystem::_Split(const string &filePath, const char delim) const {
@@ -195,10 +180,16 @@ void FileSystem::create(const std::string &filePath)
 
 	//Decrese emptyblockCount 
 	masterTemp.EmptyBlockCount--;
+
 	//Write the new EmptyBlockCount back to masterBlock
 	mMemblockDevice.writeBlock(0, (char*)&masterTemp);
 	//lägg till fil i directory
-	tempTree->AddFile(newBlock);
+	tempTree->AddFile( newBlock );
+
+	string data = "";
+	cin >> data;
+	cin.get(); // Trailing new line
+	_WriteToFile( filePath, data.data(), data.length() );
 }
 
 void FileSystem::mkdir(std::string newName)
@@ -538,7 +529,7 @@ void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& dir
 	}
 }
 
-void FileSystem::_WriteToFile( const string& filePath, char *data, unsigned dataSize )
+void FileSystem::_WriteToFile( const string& filePath, const char *data, unsigned dataSize )
 {
 	string file = "";
 	string dirString = "";
@@ -624,6 +615,114 @@ void FileSystem::_WriteToFile( const string& filePath, char *data, unsigned data
 	mMemblockDevice.writeBlock( fileBlockIndex, (char*)&fb );
 }
 
+// 1. first 250 * 512 pure data blocks for file system
+// 2. file count for subdirectory (begin at root)
+// 3. file indices for subdirectory (begin at root)
+// 4. subdir count
+// 5. first subdir prepended by length of string
+// 6. repeat at step 2 for each subdirectory
+void FileSystem::createImage( const string &saveFile ) const
+{
+	ofstream file( saveFile, ios::out | ios::binary );
+
+	if ( !file )
+	{
+		cout << "Failed to open file" << saveFile << endl;
+		return;
+	}
+
+	for ( unsigned i = 0; i < 250; ++i )
+	{
+		file.write( mMemblockDevice.readBlock( i ).data(), 512 );
+	}
+
+	function<void(const Tree*)> saveDirectory = [&file, &saveDirectory]( const Tree *dir )
+	{
+		auto& files = dir->GetFiles();
+		unsigned fileCount = files.size();
+		file.write( (char*)&fileCount, sizeof( fileCount ) );
+
+		for ( unsigned char f : files )
+		{
+			file.write( (char*)&f, sizeof( f ) );
+		}
+
+		auto& subDirs = dir->GetSubdirectories();
+		unsigned subDirCount = subDirs.size();
+		file.write( (char*)&subDirCount, sizeof( subDirCount ) );
+
+		for ( const string& s : subDirs )
+		{
+			unsigned len = s.length();
+			file.write( (char*)&len, sizeof( len ) );
+			file.write( s.data(), len );
+			saveDirectory( dir->GetDirectory( s ) );
+		}
+	};
+
+	saveDirectory( &_root );
+
+	file.close();
+}
+
+void FileSystem::restoreImage( const string &saveFile )
+{
+	ifstream file( saveFile, ios::in | ios::binary );
+
+	if ( !file )
+	{
+		cout << "Could not open file " << saveFile << endl;
+		return;
+	}
+
+	mMemblockDevice.reset();
+	_root = Tree();
+
+	char block[512];
+	for ( unsigned i = 0; i < 250; ++i )
+	{
+		file.read( block, 512 );
+		mMemblockDevice.writeBlock( i, block );
+	}
+
+	function<void( Tree* )> restoreDirectory = [&file, &restoreDirectory]( Tree *dir )
+	{
+		unsigned fileCount;
+		file.read( (char*)&fileCount, sizeof( unsigned ) );
+		
+		unsigned char *fileIndices = new unsigned char[fileCount];
+		file.read( (char*)fileIndices, sizeof( unsigned char ) * fileCount );
+		for ( unsigned i = 0; i < fileCount; ++i )
+		{
+			dir->AddFile( fileIndices[i] );
+		}
+		delete[] fileIndices;
+
+		unsigned subDirCount;
+		file.read( (char*)&subDirCount, sizeof( unsigned ) );
+
+		for ( unsigned i = 0; i < subDirCount; ++i )
+		{
+			unsigned strLen;
+			file.read( (char*)&strLen, sizeof( unsigned ) );
+
+			char *str = new char[strLen + 1];
+			str[strLen] = '\0';
+			file.read( str, strLen );
+			string s( str );
+			delete[] str;
+
+			restoreDirectory( dir->AddSubdirectory( s ) );
+		}
+	};
+
+	restoreDirectory( &_root );
+
+	file.close();
+
+	cd( "/" );
+}
+
 // [KLART]
 // format
 // create <filnamn>
@@ -636,10 +735,10 @@ void FileSystem::_WriteToFile( const string& filePath, char *data, unsigned data
 // rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
 // cat <filnamn> skriv ut innehåll på skärm
 // copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
-
-// [KVAR]
 // createImage <filnamn> (spara systemet på datorns hårddisk)
 // restoreImage <filnamn>
+
+// [KVAR]
 // append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
 // katalognamn . och ..
 // chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
