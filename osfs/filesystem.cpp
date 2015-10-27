@@ -824,9 +824,10 @@ void FileSystem::append( const string &src, const string &dst )
 // copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
 // createImage <filnamn> (spara systemet på datorns hårddisk)
 // restoreImage <filnamn>
+// append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
+// absoluta och relativa sökvägar
 
 // [KVAR]
-// append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
 // katalognamn . och ..
 // chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
 // cat med access
