@@ -125,6 +125,8 @@ int main(void) {
                 cout << "Unknown command: " << commandArr[0] << endl;
 
             }
+
+			cout << endl;
         }
     } while (bRun == true);
 

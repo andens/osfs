@@ -388,6 +388,18 @@ void FileSystem::cat(const string& filePath) const
 			if (fb.FileSize == 0)
 				return;
 
+			if ( !(fb.Access == 0 || fb.Access == 1) )
+			{
+				HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
+				SetConsoleTextAttribute( hConsole, 12 );
+
+				cout << "Access denied." << endl;
+
+				SetConsoleTextAttribute( hConsole, 15 );
+
+				return;
+			}
+
 			for (unsigned i = 0, bytesRead = 0; bytesRead < fb.FileSize; ++i, bytesRead += 512)
 			{
 				unsigned remainingBytes = fb.FileSize - bytesRead;
@@ -860,11 +872,11 @@ void FileSystem::chmod( int permission, const string &file )
 // restoreImage <filnamn>
 // append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
 // absoluta och relativa sökvägar
+// chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
+// cat med access
 
 // [KVAR]
 // katalognamn . och ..
-// chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
-// cat med access
 // write med access
 
 // Vad vi gjort annorlunda:
