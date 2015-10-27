@@ -595,6 +595,20 @@ void FileSystem::_WriteToFile( const string& filePath, const char *data, unsigne
 	}
 
 	// Reached here: file found
+
+	// Access check
+	if ( !(fb.Access == 0 || fb.Access == 2) )
+	{
+		HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
+		SetConsoleTextAttribute( hConsole, 12 );
+
+		cout << "Access denied." << endl;
+
+		SetConsoleTextAttribute( hConsole, 15 );
+
+		return;
+	}
+
 	MasterBlock mb;
 	memcpy( &mb, mMemblockDevice.readBlock( 0 ).data(), 512 );
 	unsigned char emptyBlockPointers[512];
@@ -820,6 +834,8 @@ void FileSystem::append( const string &src, const string &dst )
 	_WriteToFile( dst, data, _cwdFiles[srcFile].FileSize + _cwdFiles[dstFile].FileSize );
 
 	delete[] data;
+
+	_GetFilesCWD();
 }
 
 // 0: read/write
@@ -874,10 +890,10 @@ void FileSystem::chmod( int permission, const string &file )
 // absoluta och relativa sökvägar
 // chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
 // cat med access
+// write med access (_WriteToFile)
 
 // [KVAR]
 // katalognamn . och ..
-// write med access
 
 // Vad vi gjort annorlunda:
 // Lagt till en funktion på Block som returnerar data
