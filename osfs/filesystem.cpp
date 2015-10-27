@@ -189,9 +189,10 @@ void FileSystem::create(const std::string &filePath)
 	tempTree->AddFile( newBlock );
 
 	string data = "";
-	cin >> data;
-	cin.get(); // Trailing new line
+	getline( cin, data );
 	_WriteToFile( filePath, data.data(), data.length() );
+
+	_GetFilesCWD();
 }
 
 void FileSystem::mkdir(std::string newName)
@@ -263,6 +264,7 @@ void FileSystem::rm(const string &filePath)
 		{
 			_RemoveFile(fileIndex);
 			directory->RemoveFile(fileIndex);
+			_GetFilesCWD();
 			return;
 		}
 	}
@@ -439,6 +441,7 @@ void FileSystem::rename( const string& src, const string& dst )
 		{
 			strcpy_s( fb.Name, dst.c_str() );
 			mMemblockDevice.writeBlock( fileIndex, (char*)&fb );
+			_GetFilesCWD();
 
 			return;
 		}
@@ -524,6 +527,8 @@ void FileSystem::copy( const string &src, const string &dst )
 	_WriteToFile( dst, data, srcFileBlock.FileSize );
 
 	delete[] data;
+
+	_GetFilesCWD();
 }
 
 void FileSystem::_SplitFilePath( const string& filePath, Tree **dir, string& dirString, string& file ) const
@@ -738,6 +743,71 @@ void FileSystem::restoreImage( const string &saveFile )
 	file.close();
 
 	cd( "/" );
+}
+
+void FileSystem::append( const string &src, const string &dst )
+{
+	unsigned char srcFile = 0;
+	unsigned char dstFile = 0;
+	for ( auto& file : _cwdFiles )
+	{
+		if ( file.second.Name == src )
+			srcFile = file.first;
+
+		if ( file.second.Name == dst )
+			dstFile = file.first;
+	}
+
+	if ( !srcFile )
+	{
+		cout << "Could not find source file '" << src << "'" << endl;
+		return;
+	}
+
+	if ( !dstFile )
+	{
+		cout << "Could not find destination file '" << dst << "'" << endl;
+		return;
+	}
+
+	// Combined data
+	char *data = new char[_cwdFiles[srcFile].FileSize + _cwdFiles[dstFile].FileSize];
+
+	// First write the destination data
+	unsigned bytesRead = 0;
+	unsigned payloadIndex = 0;
+	while ( bytesRead < _cwdFiles[dstFile].FileSize )
+	{
+		unsigned bytesToRead = _cwdFiles[dstFile].FileSize - bytesRead;
+		if ( bytesToRead > 512 )
+			bytesToRead = 512;
+
+		// Write the correct payload block into the data array at correct offset.
+		memcpy( data + bytesRead, mMemblockDevice.readBlock( _cwdFiles[dstFile].PayloadBlocks[payloadIndex] ).data(), bytesToRead );
+
+		bytesRead += bytesToRead;
+		payloadIndex++;
+	}
+
+	// Write the source data
+	bytesRead = 0;
+	payloadIndex = 0;
+	while ( bytesRead < _cwdFiles[srcFile].FileSize )
+	{
+		unsigned bytesToRead = _cwdFiles[srcFile].FileSize - bytesRead;
+		if ( bytesToRead > 512 )
+			bytesToRead = 512;
+
+		// Write the correct payload block into the data array at correct offset.
+		memcpy( data + _cwdFiles[dstFile].FileSize + bytesRead, mMemblockDevice.readBlock( _cwdFiles[srcFile].PayloadBlocks[payloadIndex] ).data(), bytesToRead );
+
+		bytesRead += bytesToRead;
+		payloadIndex++;
+	}
+
+	_WriteToFile( dst, data, _cwdFiles[srcFile].FileSize + _cwdFiles[dstFile].FileSize );
+
+	delete[] data;
 }
 
 // [KLART]

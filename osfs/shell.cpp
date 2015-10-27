@@ -90,7 +90,7 @@ int main(void) {
                 break;
 
             case 9: // append
-
+				fs.append( commandArr[1], commandArr[2] );
                 break;
 
             case 10: // rename
