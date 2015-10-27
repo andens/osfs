@@ -31,7 +31,7 @@ public:
 	void copy(const std::string &src, const std::string &dst);
 	void cd(const std::string& directory);
 	void append(const std::string &src, const std::string &dst);
-	//std::string chmod(int permission, const std::string &file);
+	void chmod(int permission, const std::string &file);
 
 	/* Add your own member-functions if needed */
 	std::string GetCWD(void) const { return _cwd->GetPath(); }

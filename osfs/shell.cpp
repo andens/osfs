@@ -7,11 +7,11 @@
 using namespace std;
 
 const int MAXCOMMANDS = 8;
-const int NUMAVAILABLECOMMANDS = 16;
+const int NUMAVAILABLECOMMANDS = 17;
 
 string availableCommands[NUMAVAILABLECOMMANDS] = {
     "quit","format","ls","create","cat","createImage","restoreImage",
-    "rm","copy","append","rename","mkdir","cd","pwd","help", "rmdir"
+	"rm", "copy", "append", "rename", "mkdir", "cd", "pwd", "help", "rmdir", "chmod"
 };
 
 /* Takes usercommand from input and returns number of commands, commands are stored in strArr[] */
@@ -115,6 +115,10 @@ int main(void) {
 
 			case 15: // rmdir
 				fs.rmdir(commandArr[1]);
+				break;
+
+			case 16: // chmod
+				fs.chmod( atoi( commandArr[1].c_str() ), commandArr[2] );
 				break;
 
             default:

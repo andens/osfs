@@ -810,6 +810,40 @@ void FileSystem::append( const string &src, const string &dst )
 	delete[] data;
 }
 
+// 0: read/write
+// 1: read
+// 2: write
+// Note: this command does not use permission of the file.
+void FileSystem::chmod( int permission, const string &file )
+{
+	if ( permission < 0 || permission > 2 )
+	{
+		cout << "Invalid permission" << endl;
+		return;
+	}
+
+	// Find file
+	unsigned char targetFile = 0;
+	for ( auto& f : _cwdFiles )
+	{
+		if ( f.second.Name == file )
+		{
+			targetFile = f.first;
+			break;
+		}
+	}
+
+	if ( !targetFile )
+	{
+		cout << "Could not find file '" << file << "'" << endl;
+		return;
+	}
+
+	// If we reached here we found the file
+	_cwdFiles[targetFile].Access = unsigned( permission );
+	mMemblockDevice.writeBlock( targetFile, (char*)&_cwdFiles[targetFile] );
+}
+
 // [KLART]
 // format
 // create <filnamn>
