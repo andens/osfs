@@ -200,6 +200,7 @@ void FileSystem::mkdir(std::string newName)
 	
 	Tree* _temp = _cwd;
 
+	newName = _ResolvePath(newName);
 	vector<string> path = _Split(newName);
 	
 	if (newName[0] == '/')
@@ -307,13 +308,14 @@ const Tree* FileSystem::_DirectoryOf(const string& path) const
 	if (path.length() == 0)
 		return nullptr;
 
-	vector<string> newPath = _Split(path);
+	string resolvedPath = _ResolvePath(path);
+	vector<string> newPath = _Split(resolvedPath);
 
 	const Tree *walker = _cwd;
 
 	// Begins with '/': absoute path, relative otherwise. In case of absolute
 	// we want to start from the root instead of the current directory.
-	if (path[0] == '/')
+	if (resolvedPath[0] == '/')
 		walker = &_root;
 
 	// Attempt to navigate to every new subdirectory.
@@ -905,43 +907,16 @@ string FileSystem::_ResolvePath(const string& filePath) const
 			}
 			else
 			{
-				parts.erase(it - 1, it);
+				parts.erase(it - 1, it + 1);
 				i -= 2;
 			}
 		}
 	}
 	
 	// Build the complete absolute path
-	string retVal = "";
+	string retVal = (parts.size() > 0) ? "" : "/";
 	for (auto& s : parts)
 		retVal += "/" + s;
 
 	return retVal;
 }
-
-// [KLART]
-// format
-// create <filnamn>
-// ls
-// mkdir <katalog>
-// cd <katalog>
-// hantera absoluta och relativa sökvägar
-// rm <filnamn> tar bort en given fil
-// pwd
-// rename <fil1> <fil2> ändrar namn på fil fil1 till fil2
-// cat <filnamn> skriv ut innehåll på skärm
-// copy <fil1> <fil2> skapa ny fil fil2 som är kopia av fil1 (glöm ej; fungera från en mapp till en annan)
-// createImage <filnamn> (spara systemet på datorns hårddisk)
-// restoreImage <filnamn>
-// append <fil1> <fil2> lägger till innehåll från fil1 i slutet av fil2
-// absoluta och relativa sökvägar
-// chmod <access> <filnamn> (dokumentera vilka koder som gör vad)
-// cat med access
-// write med access (_WriteToFile)
-
-// [KVAR]
-// katalognamn . och ..
-
-// Vad vi gjort annorlunda:
-// Lagt till en funktion på Block som returnerar data
-// Tree
