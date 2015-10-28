@@ -872,6 +872,53 @@ void FileSystem::chmod( int permission, const string &file )
 	mMemblockDevice.writeBlock( targetFile, (char*)&_cwdFiles[targetFile] );
 }
 
+string FileSystem::_ResolvePath(const string& filePath) const
+{
+	vector<string> parts = _Split(filePath);
+
+	// Relative path: prepend with current working dir
+	if (filePath[0] != '/')
+	{
+		vector<string> cwdParts = _Split(_cwd->GetPath());
+		parts.insert(parts.begin(), cwdParts.begin(), cwdParts.end());
+	}
+
+	// Go through all parts to resolve . and ..
+	// . simply removes that dot because it represents the current directory
+	// .. is removed along with the one before because we navigate up in the tree.
+	// .. only removes the part before if there is one, i.e it stops at the root.
+	for (unsigned i = 0; i < parts.size(); ++i)
+	{
+		auto it = parts.begin() + i;
+
+		if (*it == ".")
+		{
+			parts.erase(it);
+			i -= 1;
+		}
+		else if (*it == "..")
+		{
+			if (it == parts.begin())
+			{
+				parts.erase(it);
+				i -= 1;
+			}
+			else
+			{
+				parts.erase(it - 1, it);
+				i -= 2;
+			}
+		}
+	}
+	
+	// Build the complete absolute path
+	string retVal = "";
+	for (auto& s : parts)
+		retVal += "/" + s;
+
+	return retVal;
+}
+
 // [KLART]
 // format
 // create <filnamn>

@@ -66,6 +66,7 @@ private:
 	void _RemoveFile(unsigned char file);
 	void _SplitFilePath( const std::string& filePath, Tree **dir, std::string& dirString, std::string& file ) const;
 	void _WriteToFile( const std::string& filePath, const char *data, unsigned dataSize );
+	std::string _ResolvePath(const std::string& filePath) const;
 
 private:
     MemBlockDevice mMemblockDevice;
