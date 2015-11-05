@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string.h>
 #include <algorithm>
-#include <Windows.h>
+//#include <Windows.h>
 
 using namespace std;
 
@@ -86,15 +86,15 @@ void FileSystem::_ListDirectory(const Tree *directory) const
 	map<unsigned char, FileBlock> fileBlocks;
 	_GetFileBlocks(directory, fileBlocks);
 	
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, 259);
+	// HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	// SetConsoleTextAttribute(hConsole, 259);
 
 	vector<string> subDirs = directory->GetSubdirectories();
 	for_each(subDirs.begin(), subDirs.end(), [](string dir) {
 		cout << dir << "/" << endl;
 	});
 
-	SetConsoleTextAttribute(hConsole, 15);
+	//SetConsoleTextAttribute(hConsole, 15);
 
 	vector<pair<unsigned char, FileBlock>> files;
 	files.insert(files.begin(), fileBlocks.begin(), fileBlocks.end());
@@ -154,7 +154,9 @@ void FileSystem::create(const std::string &filePath)
 		return;
 	}
 
-	strncpy_s(newFile.Name,file.c_str(),file.size());
+	//strncpy_s(newFile.Name,file.c_str(),file.size());
+	//strncpy(newFile.Name, file.c_str(), file.size());
+	strcpy(newFile.Name, file.c_str());
 	newFile.Access = 0;
 	newFile.FileSize = 0;
 	for (int i = 0;i < 488;i++)
@@ -392,12 +394,12 @@ void FileSystem::cat(const string& filePath) const
 
 			if ( !(fb.Access == 0 || fb.Access == 1) )
 			{
-				HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
-				SetConsoleTextAttribute( hConsole, 12 );
+				// HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
+				// SetConsoleTextAttribute( hConsole, 12 );
 
 				cout << "Access denied." << endl;
 
-				SetConsoleTextAttribute( hConsole, 15 );
+				//SetConsoleTextAttribute( hConsole, 15 );
 
 				return;
 			}
@@ -453,7 +455,8 @@ void FileSystem::rename( const string& src, const string& dst )
 		// Found it! Time to rename.
 		if ( src == fb.Name )
 		{
-			strcpy_s( fb.Name, dst.c_str() );
+			//strcpy_s( fb.Name, dst.c_str() );
+			strcpy( fb.Name, dst.c_str() );
 			mMemblockDevice.writeBlock( fileIndex, (char*)&fb );
 			_GetFilesCWD();
 
@@ -601,12 +604,12 @@ void FileSystem::_WriteToFile( const string& filePath, const char *data, unsigne
 	// Access check
 	if ( !(fb.Access == 0 || fb.Access == 2) )
 	{
-		HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
-		SetConsoleTextAttribute( hConsole, 12 );
+		// HANDLE hConsole = GetStdHandle( STD_OUTPUT_HANDLE );
+		// SetConsoleTextAttribute( hConsole, 12 );
 
 		cout << "Access denied." << endl;
 
-		SetConsoleTextAttribute( hConsole, 15 );
+		//SetConsoleTextAttribute( hConsole, 15 );
 
 		return;
 	}
@@ -697,7 +700,7 @@ void FileSystem::createImage( const string &saveFile ) const
 			file.write( (char*)&f, sizeof( f ) );
 		}
 
-		auto& subDirs = dir->GetSubdirectories();
+		const auto& subDirs = dir->GetSubdirectories();
 		unsigned subDirCount = subDirs.size();
 		file.write( (char*)&subDirCount, sizeof( subDirCount ) );
 

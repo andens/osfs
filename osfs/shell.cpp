@@ -1,8 +1,8 @@
 #include <iostream>
 #include <sstream>
 #include "filesystem.h"
-#include <Windows.h>
-#include <crtdbg.h>
+//#include <Windows.h>
+//#include <crtdbg.h>
 
 using namespace std;
 
@@ -24,7 +24,7 @@ std::vector<string> split(const string &filePath, const char delim = '/');
 string help();
 
 int main(void) {
-	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+	//_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 
     FileSystem fs;
 
@@ -34,16 +34,16 @@ int main(void) {
 
     bool bRun = true;
 
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
     do {
 		currentDir = fs.GetCWD();
 
-		SetConsoleTextAttribute(hConsole, 10);
+		//SetConsoleTextAttribute(hConsole, 10);
 		cout << user << " ";
-		SetConsoleTextAttribute(hConsole, 14);
+		//SetConsoleTextAttribute(hConsole, 14);
 		cout << currentDir << endl;
-		SetConsoleTextAttribute(hConsole, 15);
+		//SetConsoleTextAttribute(hConsole, 15);
 		cout << "$ ";
         getline(cin, userCommand);
 
