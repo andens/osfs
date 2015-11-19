@@ -106,7 +106,7 @@ void FileSystem::_ListDirectory(const Tree *directory) const
 	});
 }
 
-void FileSystem::create(const std::string &filePath)
+void FileSystem::create(const std::string &filePath,std::string &data)
 {
 	//Kolla ifall filen redan finns
 	string file, dir;
@@ -167,7 +167,6 @@ void FileSystem::create(const std::string &filePath)
 	//step two leta reda på ledig plats
 	Block temp,_temp;
 
-
 	//Getting master block
 	temp = mMemblockDevice.readBlock(0);
 	MasterBlock masterTemp;
@@ -178,8 +177,11 @@ void FileSystem::create(const std::string &filePath)
 	//getting empty block
 	_temp = mMemblockDevice.readBlock(1);
 	//getting new pointer place
-	unsigned char newBlock = _temp.data()[BlockSlott - 1];
+	unsigned char newBlock;
+	newBlock = _temp.data()[BlockSlott - 1];
+
 	//Create new block
+	
 	mMemblockDevice.writeBlock(newBlock, (char*)&newFile);
 
 	//Decrese emptyblockCount 
@@ -190,8 +192,7 @@ void FileSystem::create(const std::string &filePath)
 	//lägg till fil i directory
 	tempTree->AddFile( newBlock );
 
-	string data = "";
-	getline( cin, data );
+
 	_WriteToFile( filePath, data.data(), data.length() );
 
 	_GetFilesCWD();
@@ -524,7 +525,7 @@ void FileSystem::copy( const string &src, const string &dst )
 
 	// If we reached here, srcFileBlock is a valid source file to be copied,
 	// and the destination file is free to be created.
-	create( dst );
+	create( dst ,dstFile);
 	char *data = new char[srcFileBlock.FileSize];
 	unsigned bytesRead = 0;
 	unsigned payloadCount = 0;

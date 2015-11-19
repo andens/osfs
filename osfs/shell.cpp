@@ -33,12 +33,12 @@ int main(void) {
     string currentDir = "/";    // current directory, used for output
 
     bool bRun = true;
-
+	fs.format();
 	//HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
     do {
 		currentDir = fs.GetCWD();
-
+		string data = "";
 		//SetConsoleTextAttribute(hConsole, 10);
 		cout << user << " ";
 		//SetConsoleTextAttribute(hConsole, 14);
@@ -70,7 +70,9 @@ int main(void) {
 					fs.ls(commandArr[1]);
                 break;
             case 3: // create
-				fs.create(commandArr[1]);
+				printf("Please Insert Data:\n");
+				getline( cin, data );
+				fs.create(commandArr[1],data);
                 break;
             case 4: // cat
 				fs.cat(commandArr[1]);

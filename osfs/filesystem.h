@@ -1,6 +1,8 @@
 #ifndef FILESYSTEM_H
 #define FILESYSTEM_H
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <string>
 #include <vector>
 #include "memblockdevice.h"
@@ -20,7 +22,7 @@ public:
 	void format(void);
 	void ls() const;
 	void ls(const std::string &path) const;  // optional
-	void create(const std::string &filePath);
+	void create(const std::string &filePath,std::string &data);
 	void cat(const std::string &fileName) const;
 	void rename( const std::string& src, const std::string& dst );
 	void createImage(const std::string &saveFile) const;
